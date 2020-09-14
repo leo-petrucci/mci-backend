@@ -252,23 +252,39 @@ export const Mutation = mutationType({
       },
     })
 
-    t.field('createDraft', {
-      type: 'Post',
-      args: {
-        title: stringArg({ nullable: false }),
-        content: stringArg(),
-      },
-      resolve: (parent, { title, content }, ctx) => {
-        const userId = getUserId(ctx)
-        if (!userId) throw new Error('Could not authenticate user.')
-        return ctx.prisma.post.create({
+    // t.field('createDraft', {
+    //   type: 'ServerPayload',
+    //   args: {
+    //     title: stringArg({ nullable: false }),
+    //     content: stringArg(),
+    //   },
+    //   resolve: (parent, { title, content }, ctx) => {
+    //     const userId = getUserId(ctx)
+    //     if (!userId) throw new Error('Could not authenticate user.')
+    //     return ctx.prisma.server.update({
+    //       data: {
+    //         title,
+    //         content,
+    //         published: false,
+    //         author: { connect: { id: Number(userId) } },
+    //       },
+    //     })
+    //   },
+    // })
+
+    t.field('deleteServer', {
+      type: 'ServerPayload',
+      args: { id: intArg({ nullable: false }) },
+      resolve: (parent, { id }, ctx) => {
+        const server = ctx.prisma.server.update({
+          where: {
+            id,
+          },
           data: {
-            title,
-            content,
             published: false,
-            author: { connect: { id: Number(userId) } },
           },
         })
+        return { server }
       },
     })
 

@@ -9,9 +9,9 @@ type AuthPayload {
 
 type Mutation {
   addTag(id: Int!, tags: [String!]!): ServerPayload!
-  createDraft(content: String, title: String!): Post!
   createServer(content: String, cover: String, ip: String!, tags: [String!]!, title: String!): ServerPayload!
   deletePost(id: Int!): Post
+  deleteServer(id: Int!): ServerPayload!
   login(email: String!, password: String!): AuthPayload!
   publish(id: Int!): Post
   removeTag(id: Int!, tag: String!): ServerPayload!
