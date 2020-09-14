@@ -17,6 +17,17 @@ const rules = {
       .author()
     return userId === author.id
   }),
+  isServerOwner: rule()(async (parent, { id }, context) => {
+    const userId = getUserId(context)
+    const author = await context.prisma.server
+      .findOne({
+        where: {
+          id: Number(id),
+        },
+      })
+      .author()
+    return userId === author.id
+  }),
 }
 
 export const permissions = shield({
@@ -26,8 +37,15 @@ export const permissions = shield({
     post: rules.isAuthenticatedUser,
   },
   Mutation: {
-    createDraft: rules.isAuthenticatedUser,
-    deletePost: rules.isPostOwner,
+    // createDraft: rules.isAuthenticatedUser,
+    createServer: rules.isAuthenticatedUser,
+    // deletePost: rules.isPostOwner,
+    updateTitle: rules.isServerOwner,
+    addTag: rules.isServerOwner,
+    removeTag: rules.isServerOwner,
+    updateCover: rules.isServerOwner,
+    updateIp: rules.isServerOwner,
+    updateRemoteInfo: rules.isServerOwner,
     publish: rules.isPostOwner,
   },
 })

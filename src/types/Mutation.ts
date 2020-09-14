@@ -69,9 +69,11 @@ export const Mutation = mutationType({
         title: stringArg({ nullable: false }),
       },
       resolve: async (parent, { title, id }, ctx) => {
-        const userId = getUserId(ctx)
-
-        if (!userId) throw new Error('Could not authenticate user.')
+        try {
+          const userId = getUserId(ctx)
+        } catch (error) {
+          return error
+        }
 
         const server = await ctx.prisma.server.update({
           where: { id: id },
