@@ -184,9 +184,10 @@ export const Mutation = mutationType({
           return error
         }
 
+        let serverInfo
         // Fetch server info
         try {
-          let serverInfo = await getServerInfo(ip)
+          serverInfo = await getServerInfo(ip)
         } catch (error) {
           return error
         }
