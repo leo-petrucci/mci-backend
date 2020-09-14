@@ -9,11 +9,18 @@ interface Token {
 }
 
 export function getUserId(context: Context) {
+  console.log('Is user authenticated?')
   const Authorization = context.request.get('Authorization')
+  console.log('token', Authorization)
   if (Authorization) {
+    console.log('Token exists')
     const token = Authorization.replace('Bearer ', '')
-    const verifiedToken = verify(token, APP_SECRET) as Token
-    return verifiedToken && verifiedToken.userId
+    try {
+      const verifiedToken = verify(token, APP_SECRET) as Token
+      return verifiedToken && verifiedToken.userId
+    } catch (error) {
+      throw new Error('Could not authenticate user.')
+    }
   }
 }
 
@@ -22,12 +29,9 @@ interface ServerData {}
 export async function getServerInfo(
   Ip: String,
 ): Promise<{ online: boolean; version: string; players: { max: number } }> {
-  try {
-    const { data } = await axios.get(`https://api.mcsrvstat.us/2/${Ip}`)
-    return data
-  } catch (error) {
-    return error
-  }
+  const { data } = await axios.get(`https://api.mcsrvstat.us/2/${Ip}`)
+  if (!data.online) throw new Error('Could not fetch server.')
+  return data
 }
 
 export async function getVersionQuery(context: Context, versionName: string) {

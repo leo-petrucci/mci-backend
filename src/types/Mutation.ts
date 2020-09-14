@@ -178,12 +178,18 @@ export const Mutation = mutationType({
         ip: stringArg({ nullable: false }),
       },
       resolve: async (parent, { id, ip }, ctx) => {
-        const userId = getUserId(ctx)
-        if (!userId) throw new Error('Could not authenticate user.')
+        try {
+          const userId = getUserId(ctx)
+        } catch (error) {
+          return error
+        }
 
         // Fetch server info
-        let serverInfo = await getServerInfo(ip)
-        if (!serverInfo.online) throw new Error('Could not find server info.')
+        try {
+          let serverInfo = await getServerInfo(ip)
+        } catch (error) {
+          return error
+        }
 
         // return create or connect version
         const versionQuery = await getVersionQuery(ctx, serverInfo.version)
