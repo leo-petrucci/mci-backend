@@ -1,6 +1,6 @@
 import { verify } from 'jsonwebtoken'
 import { Context } from './context'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 export const APP_SECRET = 'appsecret321'
 
@@ -17,15 +17,21 @@ export function getUserId(context: Context) {
   }
 }
 
-export async function getServerInfo(Ip: String) {
-  const server = await axios
-    .get(`https://api.mcsrvstat.us/2/${Ip}`)
-    .then((res) => res)
-    .catch((error) => console.log(error))
-  return server.data
+interface ServerData {}
+
+export async function getServerInfo(
+  Ip: String,
+): Promise<{ online: boolean; version: string; players: { max: number } }> {
+  try {
+    const { data } = await axios.get(`https://api.mcsrvstat.us/2/${Ip}`)
+    return data
+  } catch (error) {
+    return error
+  }
 }
 
-export async function getVersionQuery(context: Context, versionName: String) {
+export async function getVersionQuery(context: Context, versionName: string) {
+  console.log('checking if ', versionName, 'exists')
   const foundVersion = await context.prisma.version.findOne({
     where: {
       versionName: String(versionName),
@@ -39,7 +45,13 @@ export async function getVersionQuery(context: Context, versionName: String) {
     : { create: { versionName } }
 }
 
-export async function getTagsQuery(context: Context, tags: String[]) {
+export async function getTagsQuery(
+  context: Context,
+  tags: String[],
+): Promise<{
+  create: any[]
+  connect: any[]
+}> {
   const foundTags = tags.map(async (tag) => {
     console.log('Checking tag', tag)
     const foundTag = await context.prisma.tag.findOne({
@@ -54,8 +66,8 @@ export async function getTagsQuery(context: Context, tags: String[]) {
   })
 
   const data = await Promise.all(foundTags).then((values) => {
-    let create = []
-    let connect = []
+    let create: object[] = []
+    let connect: object[] = []
     values.map((value) => {
       // console.log('checking value', value)
       if (value.foundTag) {

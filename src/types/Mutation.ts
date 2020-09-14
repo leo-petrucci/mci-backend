@@ -73,8 +73,6 @@ export const Mutation = mutationType({
 
         if (!userId) throw new Error('Could not authenticate user.')
 
-        const tagObjects = await getTagsQuery(ctx, tags)
-
         const server = await ctx.prisma.server.update({
           where: { id: id },
           data: {
@@ -194,6 +192,7 @@ export const Mutation = mutationType({
         const server = await ctx.prisma.server.update({
           where: { id: id },
           data: {
+            version: versionQuery,
             slots: serverInfo.players.max,
           },
         })

@@ -17,6 +17,7 @@ type Mutation {
   removeTag(id: Int!, tag: String!): ServerPayload!
   signup(email: String!, password: String!, username: String!): AuthPayload!
   updateCover(cover: String!, id: Int!): ServerPayload!
+  updateIp(id: Int!, ip: String!): ServerPayload!
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!
   updateTitle(id: Int!, title: String!): ServerPayload!
 }
