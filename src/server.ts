@@ -2,6 +2,7 @@ import { GraphQLServer } from 'graphql-yoga'
 import { permissions } from './permissions'
 import { schema } from './schema'
 import { createContext } from './context'
+require('dotenv').config()
 
 new GraphQLServer({
   schema,

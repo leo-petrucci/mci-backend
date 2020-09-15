@@ -1,6 +1,7 @@
 import { verify } from 'jsonwebtoken'
 import { Context } from './context'
 import axios, { AxiosResponse } from 'axios'
+const qs = require('querystring')
 
 export const APP_SECRET = 'appsecret321'
 
@@ -32,6 +33,28 @@ export async function getServerInfo(
   const { data } = await axios.get(`https://api.mcsrvstat.us/2/${Ip}`)
   if (!data.online) throw new Error('Could not fetch server.')
   return data
+}
+
+export async function getUserProfile(code: string): Promise<any> {
+  const user = axios
+    .post(
+      `https://www.minecraftitalia.net/oauth/token/`,
+      qs.stringify({
+        client_id: process.env.CLIENT_ID,
+        code,
+        redirect_uri: process.env.REDIRECT_URI,
+        client_secret: process.env.CLIENT_SECRET,
+        scope: 'profile',
+        grant_type: 'authorization_code',
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    )
+    .then((res) => console.log(res.data))
+    .catch((error) => console.log(error.response.data))
 }
 
 export async function getVersionQuery(context: Context, versionName: string) {

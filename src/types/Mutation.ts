@@ -7,6 +7,7 @@ import {
   getServerInfo,
   getVersionQuery,
   getTagsQuery,
+  getUserProfile,
 } from '../utils'
 import { resolve } from 'dns'
 import { disconnect } from 'process'
@@ -57,6 +58,32 @@ export const Mutation = mutationType({
         }
         return {
           token: sign({ userId: user.id }, APP_SECRET),
+          user,
+        }
+      },
+    })
+
+    t.field('oAuthLogin', {
+      type: 'AuthPayload',
+      args: {
+        code: stringArg({ nullable: false }),
+      },
+      resolve: async (_parent, { code }, ctx) => {
+        let user
+        try {
+          user = await getUserProfile(code)
+        } catch (error) {
+          return error
+        }
+        // const user = await ctx.prisma.user.create({
+        //   data: {
+        //     username,
+        //     email,
+        //     password: hashedPassword,
+        //   },
+        // })
+        return {
+          token: '12341241234124',
           user,
         }
       },

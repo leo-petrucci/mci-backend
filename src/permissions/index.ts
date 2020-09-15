@@ -28,6 +28,14 @@ const rules = {
       .author()
     return userId === author.id
   }),
+  isServersMod: rule()(async (parent, { id }, context) => {
+    // const userId = getUserId(context)
+    // hit mci endpoint https://www.minecraftitalia.net/oauth/token/ for token (unless I make it unlimited, which I might)
+    // then use token to hit https://minecraftitalia.net/api/core/members/${userId}
+    // if profile.secondaryGroups contains object with id: 24 [for serverlist mods]
+    // return true
+    return true
+  }),
 }
 
 export const permissions = shield({
