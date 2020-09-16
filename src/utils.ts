@@ -43,64 +43,57 @@ export async function getMciToken(
   expires_in: number
   refresh_token: string
 }> {
-  console.log('fetching token')
-  const { data } = await axios.post(
-    `https://www.minecraftitalia.net/oauth/token/`,
-    qs.stringify({
-      client_id: process.env.USER_CLIENT_ID,
-      code,
-      redirect_uri: process.env.REDIRECT_URI,
-      client_secret: process.env.USER_CLIENT_SECRET,
-      scope: 'profile',
-      grant_type: 'authorization_code',
-    }),
-    {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+  const data = await axios
+    .post(
+      `https://www.minecraftitalia.net/oauth/token/`,
+      qs.stringify({
+        client_id: process.env.USER_CLIENT_ID,
+        code,
+        redirect_uri: process.env.REDIRECT_URI,
+        client_secret: process.env.USER_CLIENT_SECRET,
+        scope: 'profile',
+        grant_type: 'authorization_code',
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
       },
-    },
-  )
+    )
+    .then((res) => res.data)
+    .catch((error) => error.response.data)
+  if (!data.access_token) {
+    throw new Error(
+      `There was a problem fetching your token. ${data.error} - ${data.error_description}`,
+    )
+  }
   return data
 }
 
-export async function getMciUserId(
+export async function getMciProfile(
   access_token: String,
 ): Promise<{
   id: number
   name: string
+  email: string
   primaryGroup: { id: number }
   photoUrl: string
+  posts: number
 }> {
-  const { data } = await axios.get(
-    `https://www.minecraftitalia.net/api/core/me/`,
-    {
+  const data = await axios
+    .get(`https://www.minecraftitalia.net/api/core/me/`, {
       headers: {
         Authorization: `Bearer ${access_token}`,
       },
-    },
-  )
-  return data
-}
-
-export async function getUserProfile(code: string): Promise<any> {
-  return await getMciToken(code)
-    .then(
-      async (res) =>
-        await getMciUserId(res.access_token)
-          .then((res) => res)
-          .catch((error) => {
-            console.log(error.response.data)
-            return new Error(
-              `There was a problem fetching your profile. ${error.response.data.errorCode} - ${error.response.data.errorMessage}`,
-            )
-          }),
-    )
-    .catch((error) => {
-      console.log(error.response)
-      return new Error(
-        `There was a problem fetching your token. ${error.response.data.error} - ${error.response.data.error_description}`,
-      )
     })
+    .then((res) => res.data)
+    .catch((error) => error.response.data)
+  if (!data.id) {
+    throw new Error(
+      `There was a problem fetching your profile. ${data.errorCode} - ${data.errorMessage}`,
+    )
+  }
+  return data
 }
 
 export async function getVersionQuery(context: Context, versionName: string) {

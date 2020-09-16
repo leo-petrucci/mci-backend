@@ -12,12 +12,9 @@ type Mutation {
   createServer(content: String, cover: String, ip: String!, tags: [String!]!, title: String!): ServerPayload!
   deletePost(id: Int!): Post
   deleteServer(id: Int!): ServerPayload!
-  login(email: String!, password: String!): AuthPayload!
-  oAuthLogin(access_token: String!): AuthPayload!
-  oAuthSignup(code: String!): AuthPayload!
+  oAuthLogin(code: String!): AuthPayload!
   publish(id: Int!): Post
   removeTag(id: Int!, tag: String!): ServerPayload!
-  signup(email: String!, password: String!, username: String!): AuthPayload!
   updateCover(cover: String!, id: Int!): ServerPayload!
   updateIp(id: Int!, ip: String!): ServerPayload!
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!

@@ -35,8 +35,10 @@ model Server {
 model User {
   id       Int      @id
   email    String   @unique
-  password String   @default("")
   username String
+  role     String
+  photoUrl String   @default("")
+  posts    Int      @default(0)
   Post     Post[]
   Votes    Vote[]
   Servers  Server[]

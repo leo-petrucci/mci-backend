@@ -7,112 +7,138 @@ import {
   getServerInfo,
   getVersionQuery,
   getTagsQuery,
-  getUserProfile,
-  getMciUserId,
+  getMciToken,
+  getMciProfile,
 } from '../utils'
 import { resolve } from 'dns'
 import { disconnect } from 'process'
 
 export const Mutation = mutationType({
   definition(t) {
-    t.field('signup', {
-      type: 'AuthPayload',
-      args: {
-        username: stringArg({ nullable: false }),
-        email: stringArg({ nullable: false }),
-        password: stringArg({ nullable: false }),
-      },
-      resolve: async (_parent, { username, email, password }, ctx) => {
-        const hashedPassword = await hash(password, 10)
-        const user = await ctx.prisma.user.create({
-          data: {
-            username,
-            email,
-            password: hashedPassword,
-          },
-        })
-        return {
-          token: sign({ userId: user.id }, APP_SECRET),
-          user,
-        }
-      },
-    })
+    //   t.field('signup', {
+    //     type: 'AuthPayload',
+    //     args: {
+    //       username: stringArg({ nullable: false }),
+    //       email: stringArg({ nullable: false }),
+    //       password: stringArg({ nullable: false }),
+    //     },
+    //     resolve: async (_parent, { username, email, password }, ctx) => {
+    //       const hashedPassword = await hash(password, 10)
+    //       const user = await ctx.prisma.user.create({
+    //         data: {
+    //           id: 9999,
+    //           username,
+    //           email,
+    //           password: hashedPassword,
+    //         },
+    //       })
+    //       return {
+    //         token: sign({ userId: user.id }, APP_SECRET),
+    //         user,
+    //       }
+    //     },
+    //   })
 
-    t.field('login', {
-      type: 'AuthPayload',
-      args: {
-        email: stringArg({ nullable: false }),
-        password: stringArg({ nullable: false }),
-      },
-      resolve: async (_parent, { email, password }, ctx) => {
-        const user = await ctx.prisma.user.findOne({
-          where: {
-            email,
-          },
-        })
-        if (!user) {
-          throw new Error(`No user found for email: ${email}`)
-        }
-        const passwordValid = await compare(password, user.password)
-        if (!passwordValid) {
-          throw new Error('Invalid password')
-        }
-        return {
-          token: sign({ userId: user.id }, APP_SECRET),
-          user,
-        }
-      },
-    })
+    // t.field('login', {
+    //   type: 'AuthPayload',
+    //   args: {
+    //     email: stringArg({ nullable: false }),
+    //     password: stringArg({ nullable: false }),
+    //   },
+    //   resolve: async (_parent, { email, password }, ctx) => {
+    //     const user = await ctx.prisma.user.findOne({
+    //       where: {
+    //         email,
+    //       },
+    //     })
+    //     if (!user) {
+    //       throw new Error(`No user found for email: ${email}`)
+    //     }
+    //     const passwordValid = await compare(password, user.password)
+    //     if (!passwordValid) {
+    //       throw new Error('Invalid password')
+    //     }
+    //     return {
+    //       token: sign({ userId: user.id }, APP_SECRET),
+    //       user,
+    //     }
+    //   },
+    // })
+
+    // t.field('oAuthLogin', {
+    //   type: 'AuthPayload',
+    //   args: {
+    //     access_token: stringArg({ nullable: false }),
+    //   },
+    //   resolve: async (_parent, { access_token }, ctx) => {
+    //     let user
+    //     try {
+    //       user = await getMciProfile(access_token)
+    //     } catch (error) {
+    //       return error
+    //     }
+    //     console.log(user)
+    //     // const hashedPassword = await hash(String(user.id), 10)
+    //     // const newUser = await ctx.prisma.user.create({
+    //     //   data: {
+    //     //     id: user.id,
+    //     //     username: user.name,
+    //     //     role: "user"
+    //     //   },
+    //     // const user = await ctx.prisma.user.create({
+    //     //   data: {
+    //     //     username,
+    //     //     email,
+    //     //     password: hashedPassword,
+    //     //   },
+    //     // })
+    //     return {
+    //       access_token: '12341241234124',
+    //       user,
+    //     }
+    //   },
+    // })
 
     t.field('oAuthLogin', {
-      type: 'AuthPayload',
-      args: {
-        access_token: stringArg({ nullable: false }),
-      },
-      resolve: async (_parent, { access_token }, ctx) => {
-        let user
-        try {
-          user = await getMciUserId(access_token)
-        } catch (error) {
-          return error
-        }
-        console.log(user)
-        // const user = await ctx.prisma.user.create({
-        //   data: {
-        //     username,
-        //     email,
-        //     password: hashedPassword,
-        //   },
-        // })
-        return {
-          token: '12341241234124',
-          user,
-        }
-      },
-    })
-
-    t.field('oAuthSignup', {
       type: 'AuthPayload',
       args: {
         code: stringArg({ nullable: false }),
       },
       resolve: async (_parent, { code }, ctx) => {
-        let user
+        let token
         try {
-          user = await getUserProfile(code)
-          // console.log('user profile is', user)
+          token = await getMciToken(code)
         } catch (error) {
           return error
         }
-        // const user = await ctx.prisma.user.create({
-        //   data: {
-        //     username,
-        //     email,
-        //     password: hashedPassword,
-        //   },
-        // })
+
+        let userProfile
+        try {
+          userProfile = await getMciProfile(token.access_token)
+        } catch (error) {
+          return error
+        }
+
+        const user = await ctx.prisma.user.upsert({
+          where: { id: userProfile.id },
+          create: {
+            id: userProfile.id,
+            username: userProfile.name,
+            photoUrl: userProfile.photoUrl,
+            email: userProfile.email,
+            role: 'user',
+            posts: userProfile.posts,
+          },
+          update: {
+            username: userProfile.name,
+            photoUrl: userProfile.photoUrl,
+            email: userProfile.email,
+            role: 'user',
+            posts: userProfile.posts,
+          },
+        })
         return {
-          token: '12341241234124',
+          token: sign({ userId: user.id, role: user.role }, APP_SECRET),
           user,
         }
       },
