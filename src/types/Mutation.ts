@@ -15,90 +15,6 @@ import { disconnect } from 'process'
 
 export const Mutation = mutationType({
   definition(t) {
-    //   t.field('signup', {
-    //     type: 'AuthPayload',
-    //     args: {
-    //       username: stringArg({ nullable: false }),
-    //       email: stringArg({ nullable: false }),
-    //       password: stringArg({ nullable: false }),
-    //     },
-    //     resolve: async (_parent, { username, email, password }, ctx) => {
-    //       const hashedPassword = await hash(password, 10)
-    //       const user = await ctx.prisma.user.create({
-    //         data: {
-    //           id: 9999,
-    //           username,
-    //           email,
-    //           password: hashedPassword,
-    //         },
-    //       })
-    //       return {
-    //         token: sign({ userId: user.id }, APP_SECRET),
-    //         user,
-    //       }
-    //     },
-    //   })
-
-    // t.field('login', {
-    //   type: 'AuthPayload',
-    //   args: {
-    //     email: stringArg({ nullable: false }),
-    //     password: stringArg({ nullable: false }),
-    //   },
-    //   resolve: async (_parent, { email, password }, ctx) => {
-    //     const user = await ctx.prisma.user.findOne({
-    //       where: {
-    //         email,
-    //       },
-    //     })
-    //     if (!user) {
-    //       throw new Error(`No user found for email: ${email}`)
-    //     }
-    //     const passwordValid = await compare(password, user.password)
-    //     if (!passwordValid) {
-    //       throw new Error('Invalid password')
-    //     }
-    //     return {
-    //       token: sign({ userId: user.id }, APP_SECRET),
-    //       user,
-    //     }
-    //   },
-    // })
-
-    // t.field('oAuthLogin', {
-    //   type: 'AuthPayload',
-    //   args: {
-    //     access_token: stringArg({ nullable: false }),
-    //   },
-    //   resolve: async (_parent, { access_token }, ctx) => {
-    //     let user
-    //     try {
-    //       user = await getMciProfile(access_token)
-    //     } catch (error) {
-    //       return error
-    //     }
-    //     console.log(user)
-    //     // const hashedPassword = await hash(String(user.id), 10)
-    //     // const newUser = await ctx.prisma.user.create({
-    //     //   data: {
-    //     //     id: user.id,
-    //     //     username: user.name,
-    //     //     role: "user"
-    //     //   },
-    //     // const user = await ctx.prisma.user.create({
-    //     //   data: {
-    //     //     username,
-    //     //     email,
-    //     //     password: hashedPassword,
-    //     //   },
-    //     // })
-    //     return {
-    //       access_token: '12341241234124',
-    //       user,
-    //     }
-    //   },
-    // })
-
     t.field('oAuthLogin', {
       type: 'AuthPayload',
       args: {
@@ -144,6 +60,28 @@ export const Mutation = mutationType({
       },
     })
 
+    t.field('updateRole', {
+      type: 'User',
+      args: {
+        id: intArg({ nullable: false }),
+        role: stringArg({ nullable: false }),
+      },
+      resolve: async (parent, { id, role }, ctx) => {
+        const user = await ctx.prisma.user.update({
+          where: { id: id },
+          data: {
+            role,
+          },
+        })
+        return {
+          role: user.role,
+          username: user.username,
+          email: user.email,
+          id: user.id,
+        }
+      },
+    })
+
     t.field('updateTitle', {
       type: 'ServerPayload',
       args: {
@@ -151,12 +89,6 @@ export const Mutation = mutationType({
         title: stringArg({ nullable: false }),
       },
       resolve: async (parent, { title, id }, ctx) => {
-        try {
-          const userId = getUserId(ctx)
-        } catch (error) {
-          return error
-        }
-
         const server = await ctx.prisma.server.update({
           where: { id: id },
           data: {
@@ -174,10 +106,6 @@ export const Mutation = mutationType({
         tags: stringArg({ list: true, nullable: false }),
       },
       resolve: async (parent, { id, tags }, ctx) => {
-        const userId = getUserId(ctx)
-
-        if (!userId) throw new Error('Could not authenticate user.')
-
         const tagObjects = await getTagsQuery(ctx, tags)
 
         const server = await ctx.prisma.server.update({
@@ -241,9 +169,13 @@ export const Mutation = mutationType({
         ip: stringArg({ nullable: false }),
       },
       resolve: async (parent, { id, ip }, ctx) => {
-        const userId = getUserId(ctx)
-
-        if (!userId) throw new Error('Could not authenticate user.')
+        let serverInfo
+        // Fetch server info
+        try {
+          serverInfo = await getServerInfo(ip)
+        } catch (error) {
+          return error
+        }
 
         const server = await ctx.prisma.server.update({
           where: { id: id },
@@ -317,6 +249,7 @@ export const Mutation = mutationType({
             title,
             content,
             cover,
+            ip: ip,
             version: versionQuery,
             slots: serverInfo.players.max,
             tags: tagObjects,
@@ -327,26 +260,6 @@ export const Mutation = mutationType({
         return { server }
       },
     })
-
-    // t.field('createDraft', {
-    //   type: 'ServerPayload',
-    //   args: {
-    //     title: stringArg({ nullable: false }),
-    //     content: stringArg(),
-    //   },
-    //   resolve: (parent, { title, content }, ctx) => {
-    //     const userId = getUserId(ctx)
-    //     if (!userId) throw new Error('Could not authenticate user.')
-    //     return ctx.prisma.server.update({
-    //       data: {
-    //         title,
-    //         content,
-    //         published: false,
-    //         author: { connect: { id: Number(userId) } },
-    //       },
-    //     })
-    //   },
-    // })
 
     t.field('deleteServer', {
       type: 'ServerPayload',

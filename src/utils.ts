@@ -10,11 +10,22 @@ interface Token {
 }
 
 export function getUserId(context: Context) {
-  console.log('Is user authenticated?')
   const Authorization = context.request.get('Authorization')
-  console.log('token', Authorization)
   if (Authorization) {
-    console.log('Token exists')
+    const token = Authorization.replace('Bearer ', '')
+    try {
+      const verifiedToken = verify(token, APP_SECRET) as Token
+      return verifiedToken && verifiedToken.userId
+    } catch (error) {
+      console.log('auth error')
+      throw new Error('Could not authenticate user.')
+    }
+  }
+}
+
+export function getUserRole(context: Context) {
+  const Authorization = context.request.get('Authorization')
+  if (Authorization) {
     const token = Authorization.replace('Bearer ', '')
     try {
       const verifiedToken = verify(token, APP_SECRET) as Token
@@ -24,8 +35,6 @@ export function getUserId(context: Context) {
     }
   }
 }
-
-interface ServerData {}
 
 export async function getServerInfo(
   Ip: String,

@@ -17,7 +17,7 @@ export const Query = queryType({
     })
 
     t.list.field('feed', {
-      type: 'Post',
+      type: 'Server',
       resolve: (parent, args, ctx) => {
         return ctx.prisma.server.findMany({
           where: { published: true },

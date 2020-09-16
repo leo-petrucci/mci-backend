@@ -18,6 +18,7 @@ type Mutation {
   updateCover(cover: String!, id: Int!): ServerPayload!
   updateIp(id: Int!, ip: String!): ServerPayload!
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!
+  updateRole(id: Int!, role: String!): User!
   updateTitle(id: Int!, title: String!): ServerPayload!
 }
 
@@ -30,7 +31,7 @@ type Post {
 }
 
 type Query {
-  feed: [Post!]!
+  feed: [Server!]!
   filterPosts(searchString: String): [Post!]!
   me: User
   post(id: Int): Post
@@ -39,11 +40,8 @@ type Query {
 type Server {
   author: User!
   content: String
-  cover: String
   id: Int!
   published: Boolean!
-  slots: Int!
-  tags(after: TagWhereUniqueInput, before: TagWhereUniqueInput, first: Int, last: Int): [Tag!]!
   title: String!
 }
 
@@ -61,15 +59,11 @@ type Tag {
   tagName: String!
 }
 
-input TagWhereUniqueInput {
-  id: Int
-  tagName: String
-}
-
 type User {
   email: String!
   id: Int!
   Post: [Post!]!
+  role: String!
   username: String!
 }
 

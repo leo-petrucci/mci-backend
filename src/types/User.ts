@@ -6,6 +6,7 @@ export const User = objectType({
     t.model.id()
     t.model.username()
     t.model.email()
+    t.model.role()
     t.model.Post({ pagination: false })
   },
 })

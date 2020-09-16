@@ -1,5 +1,4 @@
 import { objectType } from '@nexus/schema'
-import { trimIfInNodeModules } from 'nexus-plugin-prisma/dist/schema/utils'
 
 export const Server = objectType({
   name: 'Server',
@@ -9,8 +8,5 @@ export const Server = objectType({
     t.model.title()
     t.model.content()
     t.model.author()
-    t.model.tags()
-    t.model.cover()
-    t.model.slots()
   },
 })

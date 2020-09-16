@@ -19,6 +19,7 @@ const rules = {
   }),
   isServerOwner: rule()(async (parent, { id }, context) => {
     const userId = getUserId(context)
+    console.log('user id is', userId)
     const author = await context.prisma.server
       .findOne({
         where: {
