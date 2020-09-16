@@ -100,7 +100,7 @@ export const Mutation = mutationType({
         let user
         try {
           user = await getUserProfile(code)
-          console.log('user profile is', user)
+          // console.log('user profile is', user)
         } catch (error) {
           return error
         }
@@ -236,12 +236,6 @@ export const Mutation = mutationType({
         ip: stringArg({ nullable: false }),
       },
       resolve: async (parent, { id, ip }, ctx) => {
-        try {
-          const userId = getUserId(ctx)
-        } catch (error) {
-          return error
-        }
-
         let serverInfo
         // Fetch server info
         try {

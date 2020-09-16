@@ -43,6 +43,7 @@ export async function getMciToken(
   expires_in: number
   refresh_token: string
 }> {
+  console.log('fetching token')
   const { data } = await axios.post(
     `https://www.minecraftitalia.net/oauth/token/`,
     qs.stringify({
@@ -59,8 +60,6 @@ export async function getMciToken(
       },
     },
   )
-  if (!data.access_token)
-    throw new Error('There was a problem fetching your token.')
   return data
 }
 
@@ -80,25 +79,28 @@ export async function getMciUserId(
       },
     },
   )
-  if (!data.id) throw new Error('There was a problem fetching your profile.')
   return data
 }
 
-export async function getUserProfile(
-  code: string,
-): Promise<{
-  id: number
-  name: string
-  primaryGroup: { id: number }
-  photoUrl: string
-}> {
+export async function getUserProfile(code: string): Promise<any> {
   return await getMciToken(code)
-    .then(async (res) => {
-      return await getMciUserId(res.access_token)
-        .then((res) => res)
-        .catch((error) => error.response.data)
+    .then(
+      async (res) =>
+        await getMciUserId(res.access_token)
+          .then((res) => res)
+          .catch((error) => {
+            console.log(error.response.data)
+            return new Error(
+              `There was a problem fetching your profile. ${error.response.data.errorCode} - ${error.response.data.errorMessage}`,
+            )
+          }),
+    )
+    .catch((error) => {
+      console.log(error.response)
+      return new Error(
+        `There was a problem fetching your token. ${error.response.data.error} - ${error.response.data.error_description}`,
+      )
     })
-    .catch((error) => error.response.data)
 }
 
 export async function getVersionQuery(context: Context, versionName: string) {
