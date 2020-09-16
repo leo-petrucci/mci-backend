@@ -8,6 +8,7 @@ import {
   getVersionQuery,
   getTagsQuery,
   getUserProfile,
+  getMciUserId,
 } from '../utils'
 import { resolve } from 'dns'
 import { disconnect } from 'process'
@@ -66,12 +67,40 @@ export const Mutation = mutationType({
     t.field('oAuthLogin', {
       type: 'AuthPayload',
       args: {
+        access_token: stringArg({ nullable: false }),
+      },
+      resolve: async (_parent, { access_token }, ctx) => {
+        let user
+        try {
+          user = await getMciUserId(access_token)
+        } catch (error) {
+          return error
+        }
+        console.log(user)
+        // const user = await ctx.prisma.user.create({
+        //   data: {
+        //     username,
+        //     email,
+        //     password: hashedPassword,
+        //   },
+        // })
+        return {
+          token: '12341241234124',
+          user,
+        }
+      },
+    })
+
+    t.field('oAuthSignup', {
+      type: 'AuthPayload',
+      args: {
         code: stringArg({ nullable: false }),
       },
       resolve: async (_parent, { code }, ctx) => {
         let user
         try {
           user = await getUserProfile(code)
+          console.log('user profile is', user)
         } catch (error) {
           return error
         }

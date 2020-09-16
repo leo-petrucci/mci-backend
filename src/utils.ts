@@ -35,26 +35,70 @@ export async function getServerInfo(
   return data
 }
 
-export async function getUserProfile(code: string): Promise<any> {
-  const user = axios
-    .post(
-      `https://www.minecraftitalia.net/oauth/token/`,
-      qs.stringify({
-        client_id: process.env.CLIENT_ID,
-        code,
-        redirect_uri: process.env.REDIRECT_URI,
-        client_secret: process.env.CLIENT_SECRET,
-        scope: 'profile',
-        grant_type: 'authorization_code',
-      }),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+export async function getMciToken(
+  code: String,
+): Promise<{
+  access_token: string
+  token_type: string
+  expires_in: number
+  refresh_token: string
+}> {
+  const { data } = await axios.post(
+    `https://www.minecraftitalia.net/oauth/token/`,
+    qs.stringify({
+      client_id: process.env.USER_CLIENT_ID,
+      code,
+      redirect_uri: process.env.REDIRECT_URI,
+      client_secret: process.env.USER_CLIENT_SECRET,
+      scope: 'profile',
+      grant_type: 'authorization_code',
+    }),
+    {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-    )
-    .then((res) => console.log(res.data))
-    .catch((error) => console.log(error.response.data))
+    },
+  )
+  if (!data.access_token)
+    throw new Error('There was a problem fetching your token.')
+  return data
+}
+
+export async function getMciUserId(
+  access_token: String,
+): Promise<{
+  id: number
+  name: string
+  primaryGroup: { id: number }
+  photoUrl: string
+}> {
+  const { data } = await axios.get(
+    `https://www.minecraftitalia.net/api/core/me/`,
+    {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    },
+  )
+  if (!data.id) throw new Error('There was a problem fetching your profile.')
+  return data
+}
+
+export async function getUserProfile(
+  code: string,
+): Promise<{
+  id: number
+  name: string
+  primaryGroup: { id: number }
+  photoUrl: string
+}> {
+  return await getMciToken(code)
+    .then(async (res) => {
+      return await getMciUserId(res.access_token)
+        .then((res) => res)
+        .catch((error) => error.response.data)
+    })
+    .catch((error) => error.response.data)
 }
 
 export async function getVersionQuery(context: Context, versionName: string) {

@@ -31,7 +31,7 @@ Then run `npm run generate:nexus`
 
 Get an auth code from here:
 
-`https://www.minecraftitalia.net/oauth/authorize/?client_id=92b7cfcd26fa40ec186e6a5a727208f7&redirect_uri=http://localhost:3000/redirect&response_type=code&scopes=profile`
+`https://www.minecraftitalia.net/oauth/authorize/?client_id=92b7cfcd26fa40ec186e6a5a727208f7&redirect_uri=http://localhost:3000/redirect&response_type=code&scope=profile`
 
 Then get a token by requesting:
 

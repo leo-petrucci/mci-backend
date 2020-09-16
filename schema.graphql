@@ -13,7 +13,8 @@ type Mutation {
   deletePost(id: Int!): Post
   deleteServer(id: Int!): ServerPayload!
   login(email: String!, password: String!): AuthPayload!
-  oAuthLogin(code: String!): AuthPayload!
+  oAuthLogin(access_token: String!): AuthPayload!
+  oAuthSignup(code: String!): AuthPayload!
   publish(id: Int!): Post
   removeTag(id: Int!, tag: String!): ServerPayload!
   signup(email: String!, password: String!, username: String!): AuthPayload!
