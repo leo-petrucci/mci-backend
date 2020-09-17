@@ -8,6 +8,8 @@ export const User = objectType({
     t.model.email()
     t.model.role()
     t.model.banned()
-    t.model.Post({ pagination: false })
+    t.model.photoUrl()
+    t.model.Votes()
+    t.model.Servers()
   },
 })

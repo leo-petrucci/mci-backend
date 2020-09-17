@@ -6,6 +6,6 @@ export const Vote = objectType({
   definition(t) {
     t.model.id()
     t.model.author()
-    t.model.serverId()
+    t.model.server()
   },
 })
