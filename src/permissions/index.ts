@@ -64,8 +64,6 @@ const rules = {
 export const permissions = shield({
   Query: {
     me: rules.isAuthenticatedUser,
-    filterPosts: rules.isAuthenticatedUser,
-    post: rules.isAuthenticatedUser,
   },
   Mutation: {
     // User Permissions
@@ -98,10 +96,6 @@ export const permissions = shield({
       and(rules.isAuthenticatedUser, rules.isServerOwner),
     ),
     deleteServer: or(
-      rules.isMod,
-      and(rules.isAuthenticatedUser, rules.isServerOwner),
-    ),
-    publish: or(
       rules.isMod,
       and(rules.isAuthenticatedUser, rules.isServerOwner),
     ),
