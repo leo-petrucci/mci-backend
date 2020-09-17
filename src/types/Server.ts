@@ -8,5 +8,9 @@ export const Server = objectType({
     t.model.title()
     t.model.content()
     t.model.author()
+    t.model.tags()
+    t.model.version()
+    t.model.slots()
+    t.model.cover()
   },
 })

@@ -1,4 +1,4 @@
-import { intArg, mutationType, stringArg } from '@nexus/schema'
+import { intArg, mutationType, stringArg, booleanArg } from '@nexus/schema'
 import { compare, hash } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
 import {
@@ -60,7 +60,7 @@ export const Mutation = mutationType({
     })
 
     t.field('updateRole', {
-      type: 'User',
+      type: 'UserPayload',
       args: {
         id: intArg({ nullable: false }),
         role: stringArg({ nullable: false }),
@@ -73,10 +73,26 @@ export const Mutation = mutationType({
           },
         })
         return {
-          role: user.role,
-          username: user.username,
-          email: user.email,
-          id: user.id,
+          user,
+        }
+      },
+    })
+
+    t.field('updateBan', {
+      type: 'UserPayload',
+      args: {
+        id: intArg({ nullable: false }),
+        banned: booleanArg({ nullable: false }),
+      },
+      resolve: async (parent, { banned, id }, ctx) => {
+        const user = await ctx.prisma.user.update({
+          where: { id: id },
+          data: {
+            banned,
+          },
+        })
+        return {
+          user,
         }
       },
     })

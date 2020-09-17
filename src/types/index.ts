@@ -1,5 +1,6 @@
 export * from './AuthPayload'
 export * from './ServerPayload'
+export * from './UserPayload'
 export * from './Mutation'
 export * from './Post'
 export * from './Server'

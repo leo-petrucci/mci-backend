@@ -45,8 +45,18 @@ const rules = {
         id: Number(userId),
       },
     })
-    console.log('is admin or mod', user.role === 'admin' || user.role === 'mod')
+    console.log('is mod or admin', user.role === 'admin' || user.role === 'mod')
     return user.role === 'admin' || user.role === 'mod'
+  }),
+  isAdmin: rule()(async (parent, { id }, context) => {
+    const userId = getUserId(context)
+    const user = await context.prisma.user.findOne({
+      where: {
+        id: Number(userId),
+      },
+    })
+    console.log('is admin', user.role === 'admin')
+    return user.role === 'admin'
   }),
 }
 
@@ -58,6 +68,10 @@ export const permissions = shield({
     post: rules.isAuthenticatedUser,
   },
   Mutation: {
+    // User Permissions
+    updateRole: rules.isAdmin,
+    updateBan: rules.isMod,
+    // Servers Permissions
     createServer: rules.isAuthenticatedUser,
     updateTitle: or(
       rules.isMod,
