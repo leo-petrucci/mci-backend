@@ -63,12 +63,33 @@ export const permissions = shield({
       rules.isMod,
       and(rules.isAuthenticatedUser, rules.isServerOwner),
     ),
-    addTag: and(rules.isServerOwner, or(rules.isMod)),
-    removeTag: and(rules.isServerOwner, or(rules.isMod)),
-    updateCover: and(rules.isServerOwner, or(rules.isMod)),
-    updateIp: and(rules.isServerOwner, or(rules.isMod)),
-    updateRemoteInfo: and(rules.isServerOwner, or(rules.isMod)),
-    deleteServer: and(rules.isServerOwner, or(rules.isMod)),
-    publish: and(rules.isServerOwner, or(rules.isMod)),
+    addTag: or(
+      rules.isMod,
+      and(rules.isAuthenticatedUser, rules.isServerOwner),
+    ),
+    removeTag: or(
+      rules.isMod,
+      and(rules.isAuthenticatedUser, rules.isServerOwner),
+    ),
+    updateCover: or(
+      rules.isMod,
+      and(rules.isAuthenticatedUser, rules.isServerOwner),
+    ),
+    updateIp: or(
+      rules.isMod,
+      and(rules.isAuthenticatedUser, rules.isServerOwner),
+    ),
+    updateRemoteInfo: or(
+      rules.isMod,
+      and(rules.isAuthenticatedUser, rules.isServerOwner),
+    ),
+    deleteServer: or(
+      rules.isMod,
+      and(rules.isAuthenticatedUser, rules.isServerOwner),
+    ),
+    publish: or(
+      rules.isMod,
+      and(rules.isAuthenticatedUser, rules.isServerOwner),
+    ),
   },
 })
