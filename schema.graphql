@@ -15,10 +15,11 @@ type Mutation {
   oAuthLogin(code: String!): AuthPayload!
   publish(id: Int!): Post
   removeTag(id: Int!, tag: String!): ServerPayload!
+  updateBan(banned: Boolean!, id: Int!): UserPayload!
   updateCover(cover: String!, id: Int!): ServerPayload!
   updateIp(id: Int!, ip: String!): ServerPayload!
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!
-  updateRole(id: Int!, role: String!): User!
+  updateRole(id: Int!, role: String!): UserPayload!
   updateTitle(id: Int!, title: String!): ServerPayload!
 }
 
@@ -60,11 +61,16 @@ type Tag {
 }
 
 type User {
+  banned: Boolean!
   email: String!
   id: Int!
   Post: [Post!]!
   role: String!
   username: String!
+}
+
+type UserPayload {
+  user: User!
 }
 
 type Version {
