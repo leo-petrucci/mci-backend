@@ -7,57 +7,76 @@ import {
   getServerInfo,
   getVersionQuery,
   getTagsQuery,
+  getMciToken,
+  getMciProfile,
 } from '../utils'
 import { resolve } from 'dns'
 import { disconnect } from 'process'
 
 export const Mutation = mutationType({
   definition(t) {
-    t.field('signup', {
+    t.field('oAuthLogin', {
       type: 'AuthPayload',
       args: {
-        username: stringArg({ nullable: false }),
-        email: stringArg({ nullable: false }),
-        password: stringArg({ nullable: false }),
+        code: stringArg({ nullable: false }),
       },
-      resolve: async (_parent, { username, email, password }, ctx) => {
-        const hashedPassword = await hash(password, 10)
-        const user = await ctx.prisma.user.create({
-          data: {
-            username,
-            email,
-            password: hashedPassword,
+      resolve: async (_parent, { code }, ctx) => {
+        let token
+        try {
+          token = await getMciToken(code)
+        } catch (error) {
+          return error
+        }
+
+        let userProfile
+        try {
+          userProfile = await getMciProfile(token.access_token)
+        } catch (error) {
+          return error
+        }
+
+        const user = await ctx.prisma.user.upsert({
+          where: { id: userProfile.id },
+          create: {
+            id: userProfile.id,
+            username: userProfile.name,
+            photoUrl: userProfile.photoUrl,
+            email: userProfile.email,
+            role: 'user',
+            posts: userProfile.posts,
+          },
+          update: {
+            username: userProfile.name,
+            photoUrl: userProfile.photoUrl,
+            email: userProfile.email,
+            posts: userProfile.posts,
           },
         })
         return {
-          token: sign({ userId: user.id }, APP_SECRET),
+          token: sign({ userId: user.id, role: user.role }, APP_SECRET),
           user,
         }
       },
     })
 
-    t.field('login', {
-      type: 'AuthPayload',
+    t.field('updateRole', {
+      type: 'User',
       args: {
-        email: stringArg({ nullable: false }),
-        password: stringArg({ nullable: false }),
+        id: intArg({ nullable: false }),
+        role: stringArg({ nullable: false }),
       },
-      resolve: async (_parent, { email, password }, ctx) => {
-        const user = await ctx.prisma.user.findOne({
-          where: {
-            email,
+      resolve: async (parent, { id, role }, ctx) => {
+        const user = await ctx.prisma.user.update({
+          where: { id: id },
+          data: {
+            role,
           },
         })
-        if (!user) {
-          throw new Error(`No user found for email: ${email}`)
-        }
-        const passwordValid = await compare(password, user.password)
-        if (!passwordValid) {
-          throw new Error('Invalid password')
-        }
         return {
-          token: sign({ userId: user.id }, APP_SECRET),
-          user,
+          role: user.role,
+          username: user.username,
+          email: user.email,
+          id: user.id,
         }
       },
     })
@@ -69,10 +88,6 @@ export const Mutation = mutationType({
         title: stringArg({ nullable: false }),
       },
       resolve: async (parent, { title, id }, ctx) => {
-        const userId = getUserId(ctx)
-
-        if (!userId) throw new Error('Could not authenticate user.')
-
         const server = await ctx.prisma.server.update({
           where: { id: id },
           data: {
@@ -90,10 +105,6 @@ export const Mutation = mutationType({
         tags: stringArg({ list: true, nullable: false }),
       },
       resolve: async (parent, { id, tags }, ctx) => {
-        const userId = getUserId(ctx)
-
-        if (!userId) throw new Error('Could not authenticate user.')
-
         const tagObjects = await getTagsQuery(ctx, tags)
 
         const server = await ctx.prisma.server.update({
@@ -157,9 +168,13 @@ export const Mutation = mutationType({
         ip: stringArg({ nullable: false }),
       },
       resolve: async (parent, { id, ip }, ctx) => {
-        const userId = getUserId(ctx)
-
-        if (!userId) throw new Error('Could not authenticate user.')
+        let serverInfo
+        // Fetch server info
+        try {
+          serverInfo = await getServerInfo(ip)
+        } catch (error) {
+          return error
+        }
 
         const server = await ctx.prisma.server.update({
           where: { id: id },
@@ -178,12 +193,6 @@ export const Mutation = mutationType({
         ip: stringArg({ nullable: false }),
       },
       resolve: async (parent, { id, ip }, ctx) => {
-        try {
-          const userId = getUserId(ctx)
-        } catch (error) {
-          return error
-        }
-
         let serverInfo
         // Fetch server info
         try {
@@ -239,6 +248,7 @@ export const Mutation = mutationType({
             title,
             content,
             cover,
+            ip: ip,
             version: versionQuery,
             slots: serverInfo.players.max,
             tags: tagObjects,
@@ -250,23 +260,19 @@ export const Mutation = mutationType({
       },
     })
 
-    t.field('createDraft', {
-      type: 'Post',
-      args: {
-        title: stringArg({ nullable: false }),
-        content: stringArg(),
-      },
-      resolve: (parent, { title, content }, ctx) => {
-        const userId = getUserId(ctx)
-        if (!userId) throw new Error('Could not authenticate user.')
-        return ctx.prisma.post.create({
+    t.field('deleteServer', {
+      type: 'ServerPayload',
+      args: { id: intArg({ nullable: false }) },
+      resolve: (parent, { id }, ctx) => {
+        const server = ctx.prisma.server.update({
+          where: {
+            id,
+          },
           data: {
-            title,
-            content,
             published: false,
-            author: { connect: { id: Number(userId) } },
           },
         })
+        return { server }
       },
     })
 

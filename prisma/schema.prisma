@@ -33,10 +33,13 @@ model Server {
 }
 
 model User {
-  id       Int      @default(autoincrement()) @id
+  id       Int      @id
   email    String   @unique
-  password String   @default("")
   username String
+  role     String
+  photoUrl String   @default("")
+  posts    Int      @default(0)
+  banned   Boolean  @default(false)
   Post     Post[]
   Votes    Vote[]
   Servers  Server[]

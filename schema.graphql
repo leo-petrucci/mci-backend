@@ -9,16 +9,16 @@ type AuthPayload {
 
 type Mutation {
   addTag(id: Int!, tags: [String!]!): ServerPayload!
-  createDraft(content: String, title: String!): Post!
   createServer(content: String, cover: String, ip: String!, tags: [String!]!, title: String!): ServerPayload!
   deletePost(id: Int!): Post
-  login(email: String!, password: String!): AuthPayload!
+  deleteServer(id: Int!): ServerPayload!
+  oAuthLogin(code: String!): AuthPayload!
   publish(id: Int!): Post
   removeTag(id: Int!, tag: String!): ServerPayload!
-  signup(email: String!, password: String!, username: String!): AuthPayload!
   updateCover(cover: String!, id: Int!): ServerPayload!
   updateIp(id: Int!, ip: String!): ServerPayload!
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!
+  updateRole(id: Int!, role: String!): User!
   updateTitle(id: Int!, title: String!): ServerPayload!
 }
 
@@ -31,7 +31,7 @@ type Post {
 }
 
 type Query {
-  feed: [Post!]!
+  feed: [Server!]!
   filterPosts(searchString: String): [Post!]!
   me: User
   post(id: Int): Post
@@ -40,11 +40,8 @@ type Query {
 type Server {
   author: User!
   content: String
-  cover: String
   id: Int!
   published: Boolean!
-  slots: Int!
-  tags(after: TagWhereUniqueInput, before: TagWhereUniqueInput, first: Int, last: Int): [Tag!]!
   title: String!
 }
 
@@ -62,15 +59,11 @@ type Tag {
   tagName: String!
 }
 
-input TagWhereUniqueInput {
-  id: Int
-  tagName: String
-}
-
 type User {
   email: String!
   id: Int!
   Post: [Post!]!
+  role: String!
   username: String!
 }
 

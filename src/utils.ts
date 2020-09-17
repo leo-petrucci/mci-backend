@@ -1,6 +1,7 @@
 import { verify } from 'jsonwebtoken'
 import { Context } from './context'
 import axios, { AxiosResponse } from 'axios'
+const qs = require('querystring')
 
 export const APP_SECRET = 'appsecret321'
 
@@ -9,28 +10,98 @@ interface Token {
 }
 
 export function getUserId(context: Context) {
-  console.log('Is user authenticated?')
   const Authorization = context.request.get('Authorization')
-  console.log('token', Authorization)
   if (Authorization) {
-    console.log('Token exists')
     const token = Authorization.replace('Bearer ', '')
     try {
       const verifiedToken = verify(token, APP_SECRET) as Token
       return verifiedToken && verifiedToken.userId
+    } catch (error) {
+      console.log('auth error')
+      throw new Error('Could not authenticate user.')
+    }
+  }
+}
+
+export function getUserRole(context: Context) {
+  const Authorization = context.request.get('Authorization')
+  if (Authorization) {
+    const token = Authorization.replace('Bearer ', '')
+    try {
+      const verifiedToken = verify(token, APP_SECRET) as Token
+      return verifiedToken && verifiedToken.role
     } catch (error) {
       throw new Error('Could not authenticate user.')
     }
   }
 }
 
-interface ServerData {}
-
 export async function getServerInfo(
   Ip: String,
 ): Promise<{ online: boolean; version: string; players: { max: number } }> {
   const { data } = await axios.get(`https://api.mcsrvstat.us/2/${Ip}`)
   if (!data.online) throw new Error('Could not fetch server.')
+  return data
+}
+
+export async function getMciToken(
+  code: String,
+): Promise<{
+  access_token: string
+  token_type: string
+  expires_in: number
+  refresh_token: string
+}> {
+  const data = await axios
+    .post(
+      `https://www.minecraftitalia.net/oauth/token/`,
+      qs.stringify({
+        client_id: process.env.USER_CLIENT_ID,
+        code,
+        redirect_uri: process.env.REDIRECT_URI,
+        client_secret: process.env.USER_CLIENT_SECRET,
+        scope: 'profile',
+        grant_type: 'authorization_code',
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    )
+    .then((res) => res.data)
+    .catch((error) => error.response.data)
+  if (!data.access_token) {
+    throw new Error(
+      `There was a problem fetching your token. ${data.error} - ${data.error_description}`,
+    )
+  }
+  return data
+}
+
+export async function getMciProfile(
+  access_token: String,
+): Promise<{
+  id: number
+  name: string
+  email: string
+  primaryGroup: { id: number }
+  photoUrl: string
+  posts: number
+}> {
+  const data = await axios
+    .get(`https://www.minecraftitalia.net/api/core/me/`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    })
+    .then((res) => res.data)
+    .catch((error) => error.response.data)
+  if (!data.id) {
+    throw new Error(
+      `There was a problem fetching your profile. ${data.errorCode} - ${data.errorMessage}`,
+    )
+  }
   return data
 }
 
