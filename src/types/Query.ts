@@ -32,13 +32,13 @@ export const Query = queryType({
       },
     })
 
-    t.list.field('filterPosts', {
-      type: 'Post',
+    t.list.field('filterServers', {
+      type: 'Server',
       args: {
         searchString: stringArg({ nullable: true }),
       },
       resolve: (parent, { searchString }, ctx) => {
-        return ctx.prisma.post.findMany({
+        return ctx.prisma.server.findMany({
           where: {
             OR: [
               {
@@ -57,12 +57,12 @@ export const Query = queryType({
       },
     })
 
-    t.field('post', {
-      type: 'Post',
+    t.field('server', {
+      type: 'Server',
       nullable: true,
       args: { id: intArg() },
       resolve: (parent, { id }, ctx) => {
-        return ctx.prisma.post.findOne({
+        return ctx.prisma.server.findOne({
           where: {
             id: Number(id),
           },

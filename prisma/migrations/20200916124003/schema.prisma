@@ -4,7 +4,16 @@ generator client {
 
 datasource db {
   provider = ["postgres", "sqlite"]
-  url      = env("DATABASE_URL")
+  url = "***"
+}
+
+model Post {
+  id        Int     @default(autoincrement()) @id
+  title     String
+  content   String?
+  published Boolean @default(false)
+  authorId  Int?
+  author    User?   @relation(fields: [authorId], references: [id])
 }
 
 model Server {
@@ -28,9 +37,7 @@ model User {
   email    String   @unique
   username String
   role     String
-  photoUrl String   @default("")
-  posts    Int      @default(0)
-  banned   Boolean  @default(false)
+  Post     Post[]
   Votes    Vote[]
   Servers  Server[]
 }

@@ -292,28 +292,16 @@ export const Mutation = mutationType({
       },
     })
 
-    t.field('deletePost', {
-      type: 'Post',
+    t.field('restoreServer', {
+      type: 'ServerPayload',
       nullable: true,
       args: { id: intArg({ nullable: false }) },
       resolve: (parent, { id }, ctx) => {
-        return ctx.prisma.post.delete({
-          where: {
-            id,
-          },
-        })
-      },
-    })
-
-    t.field('publish', {
-      type: 'Post',
-      nullable: true,
-      args: { id: intArg({ nullable: false }) },
-      resolve: (parent, { id }, ctx) => {
-        return ctx.prisma.post.update({
+        const server = ctx.prisma.server.update({
           where: { id },
           data: { published: true },
         })
+        return { server }
       },
     })
   },
