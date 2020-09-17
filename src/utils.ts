@@ -29,7 +29,7 @@ export function getUserRole(context: Context) {
     const token = Authorization.replace('Bearer ', '')
     try {
       const verifiedToken = verify(token, APP_SECRET) as Token
-      return verifiedToken && verifiedToken.userId
+      return verifiedToken && verifiedToken.role
     } catch (error) {
       throw new Error('Could not authenticate user.')
     }

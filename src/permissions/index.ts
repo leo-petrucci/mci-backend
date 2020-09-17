@@ -1,10 +1,15 @@
-import { rule, shield } from 'graphql-shield'
-import { getUserId } from '../utils'
+import { rule, shield, and, or } from 'graphql-shield'
+import { getUserId, getUserRole } from '../utils'
 
 const rules = {
-  isAuthenticatedUser: rule()((parent, args, context) => {
+  isAuthenticatedUser: rule()(async (parent, args, context) => {
     const userId = getUserId(context)
-    return Boolean(userId)
+    const user = await context.prisma.user.findOne({
+      where: {
+        id: Number(userId),
+      },
+    })
+    return Boolean(userId) && user.role !== 'banned'
   }),
   isPostOwner: rule()(async (parent, { id }, context) => {
     const userId = getUserId(context)
@@ -19,7 +24,6 @@ const rules = {
   }),
   isServerOwner: rule()(async (parent, { id }, context) => {
     const userId = getUserId(context)
-    console.log('user id is', userId)
     const author = await context.prisma.server
       .findOne({
         where: {
@@ -29,13 +33,15 @@ const rules = {
       .author()
     return userId === author.id
   }),
-  isServersMod: rule()(async (parent, { id }, context) => {
-    // const userId = getUserId(context)
-    // hit mci endpoint https://www.minecraftitalia.net/oauth/token/ for token (unless I make it unlimited, which I might)
-    // then use token to hit https://minecraftitalia.net/api/core/members/${userId}
-    // if profile.secondaryGroups contains object with id: 24 [for serverlist mods]
-    // return true
-    return true
+  isMod: rule()(async (parent, { id }, context) => {
+    const userId = getUserId(context)
+    const user = await context.prisma.user.findOne({
+      where: {
+        id: Number(userId),
+      },
+    })
+    console.log('found user', user.role)
+    return user.role === 'admin' || user.role === 'mod'
   }),
 }
 
@@ -47,13 +53,13 @@ export const permissions = shield({
   },
   Mutation: {
     createServer: rules.isAuthenticatedUser,
-    updateTitle: rules.isServerOwner,
-    addTag: rules.isServerOwner,
-    removeTag: rules.isServerOwner,
-    updateCover: rules.isServerOwner,
-    updateIp: rules.isServerOwner,
-    updateRemoteInfo: rules.isServerOwner,
-    deleteServer: rules.isServerOwner,
-    publish: rules.isPostOwner,
+    updateTitle: and(rules.isServerOwner, or(rules.isMod)),
+    addTag: and(rules.isServerOwner, or(rules.isMod)),
+    removeTag: and(rules.isServerOwner, or(rules.isMod)),
+    updateCover: and(rules.isServerOwner, or(rules.isMod)),
+    updateIp: and(rules.isServerOwner, or(rules.isMod)),
+    updateRemoteInfo: and(rules.isServerOwner, or(rules.isMod)),
+    deleteServer: and(rules.isServerOwner, or(rules.isMod)),
+    publish: and(rules.isServerOwner, or(rules.isMod)),
   },
 })

@@ -49,7 +49,6 @@ export const Mutation = mutationType({
             username: userProfile.name,
             photoUrl: userProfile.photoUrl,
             email: userProfile.email,
-            role: 'user',
             posts: userProfile.posts,
           },
         })
