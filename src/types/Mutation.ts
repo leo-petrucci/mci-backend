@@ -285,21 +285,24 @@ export const Mutation = mutationType({
             id,
           },
           data: {
-            published: false,
+            published: true,
           },
         })
         return { server }
       },
     })
 
-    t.field('restoreServer', {
+    t.field('publishServer', {
       type: 'ServerPayload',
-      nullable: true,
       args: { id: intArg({ nullable: false }) },
       resolve: (parent, { id }, ctx) => {
         const server = ctx.prisma.server.update({
-          where: { id },
-          data: { published: true },
+          where: {
+            id,
+          },
+          data: {
+            published: true,
+          },
         })
         return { server }
       },

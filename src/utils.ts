@@ -23,19 +23,6 @@ export function getUserId(context: Context) {
   }
 }
 
-export function getUserRole(context: Context) {
-  const Authorization = context.request.get('Authorization')
-  if (Authorization) {
-    const token = Authorization.replace('Bearer ', '')
-    try {
-      const verifiedToken = verify(token, APP_SECRET) as Token
-      return verifiedToken && verifiedToken.role
-    } catch (error) {
-      throw new Error('Could not authenticate user.')
-    }
-  }
-}
-
 export async function getServerInfo(
   Ip: String,
 ): Promise<{ online: boolean; version: string; players: { max: number } }> {

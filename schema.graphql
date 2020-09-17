@@ -10,10 +10,9 @@ type AuthPayload {
 type Mutation {
   addTag(id: Int!, tags: [String!]!): ServerPayload!
   createServer(content: String, cover: String, ip: String!, tags: [String!]!, title: String!): ServerPayload!
-  deletePost(id: Int!): Post
   deleteServer(id: Int!): ServerPayload!
   oAuthLogin(code: String!): AuthPayload!
-  publish(id: Int!): Post
+  publishServer(id: Int!): ServerPayload!
   removeTag(id: Int!, tag: String!): ServerPayload!
   updateBan(banned: Boolean!, id: Int!): UserPayload!
   updateCover(cover: String!, id: Int!): ServerPayload!
@@ -23,19 +22,11 @@ type Mutation {
   updateTitle(id: Int!, title: String!): ServerPayload!
 }
 
-type Post {
-  author: User
-  content: String
-  id: Int!
-  published: Boolean!
-  title: String!
-}
-
 type Query {
   feed: [Server!]!
-  filterPosts(searchString: String): [Post!]!
+  filterServers(searchString: String): [Server!]!
   me: User
-  post(id: Int): Post
+  server(id: Int): Server
   users: [User!]!
 }
 
