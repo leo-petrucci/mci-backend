@@ -39,6 +39,7 @@ model User {
   role     String
   photoUrl String   @default("")
   posts    Int      @default(0)
+  banned   Boolean  @default(false)
   Post     Post[]
   Votes    Vote[]
   Servers  Server[]

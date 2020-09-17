@@ -9,7 +9,11 @@ const rules = {
         id: Number(userId),
       },
     })
-    return Boolean(userId) && user.role !== 'banned'
+    console.log(
+      'is authenticated and unbanned',
+      Boolean(userId) && !user.banned,
+    )
+    return Boolean(userId) && !user.banned
   }),
   isPostOwner: rule()(async (parent, { id }, context) => {
     const userId = getUserId(context)
@@ -31,6 +35,7 @@ const rules = {
         },
       })
       .author()
+    console.log('is server owner', userId === author.id)
     return userId === author.id
   }),
   isMod: rule()(async (parent, { id }, context) => {
@@ -40,11 +45,12 @@ const rules = {
         id: Number(userId),
       },
     })
-    console.log('found user', user.role)
+    console.log('is admin or mod', user.role === 'admin' || user.role === 'mod')
     return user.role === 'admin' || user.role === 'mod'
   }),
 }
 
+// Being admin or mod takes precedence over being banned or not
 export const permissions = shield({
   Query: {
     me: rules.isAuthenticatedUser,
@@ -53,7 +59,10 @@ export const permissions = shield({
   },
   Mutation: {
     createServer: rules.isAuthenticatedUser,
-    updateTitle: and(rules.isServerOwner, or(rules.isMod)),
+    updateTitle: or(
+      rules.isMod,
+      and(rules.isAuthenticatedUser, rules.isServerOwner),
+    ),
     addTag: and(rules.isServerOwner, or(rules.isMod)),
     removeTag: and(rules.isServerOwner, or(rules.isMod)),
     updateCover: and(rules.isServerOwner, or(rules.isMod)),
