@@ -1,7 +1,5 @@
 # Important notes
 
-Adding to test vercel deploy
-
 ## Set up Postgres
 
 - `sudo -u postgres createuser <user>`
