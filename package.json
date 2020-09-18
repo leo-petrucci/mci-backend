@@ -9,7 +9,9 @@
     "generate:prisma": "prisma generate",
     "generate:nexus": "ts-node --transpile-only src/schema",
     "test": "jest",
-    "dev": "ts-node-dev --no-notify --respawn --transpileOnly src/server"
+    "dev": "ts-node-dev --no-notify --respawn --transpileOnly src/server",
+    "netlify:build": "netlify-lambda build",
+    "netlify:serve": "netlify-lambda serve"
   },
   "dependencies": {
     "@nexus/schema": "0.15.0",
@@ -21,7 +23,8 @@
     "graphql-yoga": "1.18.3",
     "jsonwebtoken": "8.5.1",
     "nanoid": "^3.1.12",
-    "nexus-plugin-prisma": "0.18.2",
+    "netlify-lambda": "^2.0.1",
+    "nexus-plugin-prisma": "^0.19.0",
     "pg": "^8.3.3",
     "querystring": "^0.2.0"
   },
