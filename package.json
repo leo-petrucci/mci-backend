@@ -2,8 +2,8 @@
   "name": "prisma-backend",
   "license": "MIT",
   "scripts": {
-    "start": "node dist/server",
-    "clean": "rm -rf dist",
+    "start": "node api/server",
+    "clean": "rm -rf api",
     "build": "npm -s run clean && npm -s run generate && tsc",
     "generate": "npm -s run generate:prisma && npm -s run generate:nexus",
     "generate:prisma": "prisma generate",

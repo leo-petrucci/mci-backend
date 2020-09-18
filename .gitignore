@@ -4,3 +4,5 @@ src/generated/
 *.env*
 .vercel
 zipped
+# Local Netlify folder
+.netlify
