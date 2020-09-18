@@ -6,4 +6,3 @@ src/generated/
 zipped
 # Local Netlify folder
 .netlify
-api/
