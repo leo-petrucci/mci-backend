@@ -53,7 +53,10 @@ export const Mutation = mutationType({
           },
         })
         return {
-          token: sign({ userId: user.id, role: user.role }, APP_SECRET),
+          token: sign({ userId: user.id, role: user.role }, APP_SECRET, {
+            expiresIn: '7d',
+          }),
+          expiresIn: 604800,
           user,
         }
       },
