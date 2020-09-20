@@ -3,7 +3,7 @@ import { Context } from './context'
 import axios, { AxiosResponse } from 'axios'
 const qs = require('querystring')
 
-export const APP_SECRET = 'appsecret321'
+export const APP_SECRET: string = process.env.APP_SECRET!
 
 interface Token {
   userId: string
