@@ -2,7 +2,7 @@ export {}
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 import { GraphQLServer } from 'graphql-yoga'
-const { server } = require('../src/server.ts')
+const { server } = require('../server.ts')
 const gql = require('graphql-tag')
 
 let app: GraphQLServer

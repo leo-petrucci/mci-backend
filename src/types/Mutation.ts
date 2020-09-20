@@ -1,4 +1,10 @@
-import { intArg, mutationType, stringArg, booleanArg } from '@nexus/schema'
+import {
+  intArg,
+  mutationType,
+  stringArg,
+  booleanArg,
+  FieldResolver,
+} from '@nexus/schema'
 import { compare, hash } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
 import {
@@ -10,8 +16,6 @@ import {
   getMciToken,
   getMciProfile,
 } from '../utils'
-import { resolve } from 'dns'
-import { disconnect } from 'process'
 
 export const Mutation = mutationType({
   definition(t) {
@@ -106,7 +110,10 @@ export const Mutation = mutationType({
         id: intArg({ nullable: false }),
         title: stringArg({ nullable: false }),
       },
-      resolve: async (parent, { title, id }, ctx) => {
+      resolve: async (parent, { title, id }, ctx): Promise<any> => {
+        if (title && title.length < 20) {
+          return new Error('Title must be at least 20 characters long.')
+        }
         const server = await ctx.prisma.server.update({
           where: { id: id },
           data: {

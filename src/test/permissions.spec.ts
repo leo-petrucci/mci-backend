@@ -2,7 +2,7 @@ export {}
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 import { GraphQLServer } from 'graphql-yoga'
-const { server } = require('../src/server.ts')
+const { server } = require('../server.ts')
 const gql = require('graphql-tag')
 
 let app: GraphQLServer
@@ -168,7 +168,7 @@ describe('Permissions', () => {
       .set('Authorization', process.env.USER_TOKEN)
       .send({
         query: `mutation{
-          updateTitle(id: 1, title: "New title") {
+          updateTitle(id: 1, title: "New title of a big ole server") {
             server{
               title
             }

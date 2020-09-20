@@ -5,5 +5,5 @@
     "lib": ["esnext", "dom"],
     "strict": true
   },
-  "include": ["src/**/*", "test"]
+  "include": ["src/**/*", "src/test"]
 }

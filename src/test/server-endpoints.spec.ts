@@ -2,7 +2,7 @@ export {}
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 import { GraphQLServer } from 'graphql-yoga'
-const { server } = require('../src/server.ts')
+const { server } = require('../server.ts')
 const gql = require('graphql-tag')
 
 let app: GraphQLServer
@@ -29,14 +29,14 @@ describe('Server Endpoints', () => {
       'Expected type String!, found null.',
     )
   })
-  // it("Server title can't be short", async () => {
-  //   const res = await chai
-  //     .request(app)
-  //     .post('/')
-  //     .set('Authorization', process.env.ADMIN_TOKEN)
-  //     .send({
-  //       query: `mutation{ updateTitle(id: 1, title: "test") { server { title } } }`,
-  //     })
-  //   expect(res.body.errors).to.be.an('array')
-  // })
+  it("Server title can't be short", async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Authorization', process.env.ADMIN_TOKEN)
+      .send({
+        query: `mutation{ updateTitle(id: 1, title: "test") { server { title } } }`,
+      })
+    expect(res.body.errors).to.be.an('array')
+  })
 })
