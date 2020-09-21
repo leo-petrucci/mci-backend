@@ -37,6 +37,10 @@ describe('Server Endpoints', () => {
       .send({
         query: `mutation{ updateTitle(id: 1, title: "test") { server { title } } }`,
       })
-    expect(res.body.errors).to.be.an('array')
+    console.log(res.body.errors)
+    expect(res.body.errors[0].message).to.be.a(
+      'string',
+      'Title must be at least 10 characters long.',
+    )
   })
 })

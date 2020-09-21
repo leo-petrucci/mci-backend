@@ -27,14 +27,16 @@
     "nexus-plugin-prisma": "^0.19.0",
     "querystring": "^0.2.0",
     "ts-mocha": "^7.0.0",
-    "yarn": "^1.22.5"
+    "yarn": "^1.22.5",
+    "yup": "^0.29.3"
   },
   "devDependencies": {
-    "@types/mocha": "^8.0.3",
     "@types/bcryptjs": "2.4.2",
     "@types/jsonwebtoken": "8.5.0",
+    "@types/mocha": "^8.0.3",
     "@types/node": "12.12.58",
     "@types/ws": "7.2.6",
+    "@types/yup": "^0.29.7",
     "chai": "*",
     "chai-http": "^4.3.0",
     "mocha": "^8.1.3",

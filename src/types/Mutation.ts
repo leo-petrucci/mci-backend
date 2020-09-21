@@ -5,6 +5,7 @@ import {
   booleanArg,
   FieldResolver,
 } from '@nexus/schema'
+import { string, object } from 'yup'
 import { compare, hash } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
 import {
@@ -16,6 +17,12 @@ import {
   getMciToken,
   getMciProfile,
 } from '../utils'
+
+const validationSchema = {
+  editTitle: object().shape({
+    title: string().min(10, 'Title must be at least 10 characters long.'),
+  }),
+}
 
 export const Mutation = mutationType({
   definition(t) {
@@ -111,9 +118,15 @@ export const Mutation = mutationType({
         title: stringArg({ nullable: false }),
       },
       resolve: async (parent, { title, id }, ctx): Promise<any> => {
-        if (title && title.length < 20) {
-          return new Error('Title must be at least 20 characters long.')
+        try {
+          await validationSchema.editTitle.validate({ title })
+        } catch (e) {
+          return new Error(e.errors[0])
         }
+
+        // if (title && title.length < 20) {
+        //   return new Error('Title must be at least 20 characters long.')
+        // }
         const server = await ctx.prisma.server.update({
           where: { id: id },
           data: {
