@@ -16,6 +16,7 @@ type Mutation {
   publishServer(id: Int!): ServerPayload!
   removeTag(id: Int!, tag: String!): ServerPayload!
   updateBan(banned: Boolean!, id: Int!): UserPayload!
+  updateContent(content: String!, id: Int!): ServerPayload!
   updateCover(cover: String!, id: Int!): ServerPayload!
   updateIp(id: Int!, ip: String!): ServerPayload!
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!
