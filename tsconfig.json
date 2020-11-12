@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "api",
+    "outDir": "dist",
     "rootDir": "src",
     "lib": ["esnext"],
     "strict": true
