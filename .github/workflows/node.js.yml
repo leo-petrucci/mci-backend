@@ -26,6 +26,7 @@ jobs:
           APP_SECRET: ${{ secrets.APP_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           USER_TOKEN: ${{ secrets.USER_TOKEN }}
+  deploy:
     steps:
       - uses: actions/checkout@v2
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
