@@ -2,8 +2,9 @@ import { verify } from 'jsonwebtoken'
 import { Context } from './context'
 import axios, { AxiosResponse } from 'axios'
 const qs = require('querystring')
+require('dotenv').config()
 
-export const APP_SECRET = 'appsecret321'
+export const APP_SECRET: string = process.env.APP_SECRET!
 
 interface Token {
   userId: string
@@ -14,6 +15,7 @@ export function getUserId(context: Context) {
   if (Authorization) {
     const token = Authorization.replace('Bearer ', '')
     try {
+      console.log(verify(token, APP_SECRET))
       const verifiedToken = verify(token, APP_SECRET) as Token
       return verifiedToken && verifiedToken.userId
     } catch (error) {

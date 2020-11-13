@@ -4,7 +4,7 @@ import { schema } from './schema'
 import { createContext } from './context'
 require('dotenv').config()
 
-new GraphQLServer({
+export const server = new GraphQLServer({
   schema,
   context: createContext,
   middlewares: [permissions],
