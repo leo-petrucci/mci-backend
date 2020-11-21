@@ -3,8 +3,6 @@
 
 
 type AuthPayload {
-  expiresIn: String!
-  token: String!
   user: User!
 }
 
@@ -15,6 +13,7 @@ type Mutation {
   oAuthLogin(code: String!): AuthPayload!
   publishServer(id: Int!): ServerPayload!
   removeTag(id: Int!, tag: String!): ServerPayload!
+  testResponse: String!
   updateBan(banned: Boolean!, id: Int!): UserPayload!
   updateContent(content: String!, id: Int!): ServerPayload!
   updateCover(cover: String!, id: Int!): ServerPayload!

@@ -19,7 +19,7 @@ describe('User Endpoints', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Authorization', process.env.ADMIN_TOKEN)
+      .set('Cookie', "token=" + process.env.ADMIN_TOKEN)
       .send({ query: '{ me { username }}' })
     expect(res).to.have.status(200)
     expect(res.body.data.me.username).to.exist
@@ -28,7 +28,7 @@ describe('User Endpoints', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Authorization', process.env.ADMIN_TOKEN)
+      .set('Cookie', "token=" + process.env.ADMIN_TOKEN)
       .send({ query: '{ users { username }}' })
     expect(res).to.have.status(200)
     expect(res.body.data.users).to.be.an('array')
