@@ -15,6 +15,7 @@ export function getUserId(context: Context) {
   const Authorization = cookie.parse(context.req.header('Cookie'))
   if (Authorization) {
     const { token } = Authorization
+    console.log("token is", token)
     try {
       console.log(verify(token, APP_SECRET))
       const verifiedToken = verify(token, APP_SECRET) as Token
