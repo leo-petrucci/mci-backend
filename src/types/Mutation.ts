@@ -81,15 +81,24 @@ export const Mutation = mutationType({
             posts: userProfile.posts,
           },
         })
+
+        const securedToken = sign({ userId: user.id, role: user.role }, APP_SECRET, {
+          expiresIn: '7d',
+        })
+
+        ctx.response.cookie('token', securedToken, {
+          httpOnly: true,
+          maxAge: '7d',
+        });
+
         return {
-          token: sign({ userId: user.id, role: user.role }, APP_SECRET, {
-            expiresIn: '7d',
-          }),
+          token: securedToken,
           expiresIn: 604800,
           user,
         }
       },
     })
+    
 
     t.field('updateRole', {
       type: 'UserPayload',
