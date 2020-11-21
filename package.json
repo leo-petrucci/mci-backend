@@ -15,9 +15,11 @@
   "dependencies": {
     "@netlify/zip-it-and-ship-it": "^1.3.12",
     "@nexus/schema": "0.15.0",
+    "@types/cookie": "^0.4.0",
     "aws-lambda": "^1.0.6",
     "axios": "^0.19.2",
     "bcryptjs": "2.4.3",
+    "cookie": "^0.4.1",
     "dotenv": "^8.2.0",
     "graphql-constraint-directive": "^2.1.0",
     "graphql-middleware": "4.0.1",

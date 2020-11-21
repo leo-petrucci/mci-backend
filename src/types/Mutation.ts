@@ -17,6 +17,7 @@ import {
   getMciToken,
   getMciProfile,
 } from '../utils'
+let cookie = require("cookie")
 
 const validationSchema = {
   title: object().shape({
@@ -44,6 +45,24 @@ const validationSchema = {
 
 export const Mutation = mutationType({
   definition(t) {
+    t.field('testResponse', {
+      type: 'String',
+      args: {},
+      resolve: async (_parent, {}, { res, req }) => {
+
+        console.log(cookie.parse(req.header('Cookie')))
+
+        const securedToken = "a string";
+
+        var expiration = new Date();
+        expiration.setDate(expiration.getDate() + 7);
+
+        res.cookie('rememberme', '1', { expires: new Date(Date.now() + 900000 * 4 * 24 * 7), httpOnly: true })
+
+        return securedToken;
+      },
+    })    
+    
     t.field('oAuthLogin', {
       type: 'AuthPayload',
       args: {
@@ -86,14 +105,9 @@ export const Mutation = mutationType({
           expiresIn: '7d',
         })
 
-        ctx.response.cookie('token', securedToken, {
-          httpOnly: true,
-          maxAge: '7d',
-        });
+        ctx.res.cookie('token', securedToken, { expires: new Date(Date.now() + 900000 * 4 * 24 * 7), httpOnly: true })
 
         return {
-          token: securedToken,
-          expiresIn: 604800,
           user,
         }
       },

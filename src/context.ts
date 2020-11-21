@@ -5,14 +5,14 @@ const prisma = new PrismaClient()
 
 export interface Context {
   prisma: PrismaClient,
-  response: any,
-  request: any
+  res: any,
+  req: any
 }
 
-export function createContext(request: ContextParameters, response: ContextParameters) {
+export function createContext({ request, response, ...rest }: ContextParameters) {
   return {
-    ...request,
-    ...response,
+    req: request, 
+    res: response,
     prisma,
   }
 }
