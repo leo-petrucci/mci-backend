@@ -28,8 +28,8 @@ type Mutation {
 
 type Query {
   feed: [Server!]!
-  filterServers(searchString: String): [Server!]!
   me: User
+  searchServers(searchString: String): [Server!]!
   server(id: Int): Server
   users: [User!]!
 }

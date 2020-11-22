@@ -25,36 +25,25 @@ export const Query = queryType({
 
     t.list.field('feed', {
       type: 'Server',
-      resolve: (parent, args, ctx) => {
-        const servers = ctx.prisma
+      resolve: async (parent, args, ctx) => {
+        const servers = await ctx.prisma
           .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, count("serverId") AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") GROUP BY s.id ORDER BY "voteCount" DESC;`
-        servers.then((res) => console.log(res))
         return servers
       },
     })
 
-    t.list.field('filterServers', {
+    t.list.field('searchServers', {
       type: 'Server',
       args: {
         searchString: stringArg({ nullable: true }),
       },
-      resolve: (parent, { searchString }, ctx) => {
-        return ctx.prisma.server.findMany({
-          where: {
-            OR: [
-              {
-                title: {
-                  contains: searchString || undefined,
-                },
-              },
-              {
-                content: {
-                  contains: searchString,
-                },
-              },
-            ],
-          },
-        })
+      resolve: async (parent, { searchString }, ctx) => {
+        return await ctx.prisma
+          .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, count("serverId") AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE title LIKE ${
+          '%' + searchString + '%'
+        } OR content LIKE ${
+          '%' + searchString + '%'
+        } GROUP BY s.id ORDER BY "voteCount" DESC;`
       },
     })
 
@@ -62,12 +51,10 @@ export const Query = queryType({
       type: 'Server',
       nullable: true,
       args: { id: intArg() },
-      resolve: (parent, { id }, ctx) => {
-        return ctx.prisma.server.findOne({
-          where: {
-            id: Number(id),
-          },
-        })
+      resolve: async (parent, { id }, ctx) => {
+        const servers = await ctx.prisma
+          .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, count("serverId") AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE s.id = ${id} GROUP BY s.id LIMIT 1;`
+        return servers[0]
       },
     })
   },
