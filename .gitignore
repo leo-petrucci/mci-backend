@@ -1,7 +1,7 @@
 node_modules/
 dist/
 src/generated/
-*.env*
+.env*
 .vercel
 zipped
 # Local Netlify folder
