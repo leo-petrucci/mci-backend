@@ -23,6 +23,7 @@ type Mutation {
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!
   updateRole(id: Int!, role: String!): UserPayload!
   updateTitle(id: Int!, title: String!): ServerPayload!
+  vote(id: Int!): Server
 }
 
 type Query {
@@ -43,6 +44,8 @@ type Server {
   tags(after: TagWhereUniqueInput, before: TagWhereUniqueInput, first: Int, last: Int): [Tag!]!
   title: String!
   version: Version!
+  voteCount: Int!
+  votes(after: VoteWhereUniqueInput, before: VoteWhereUniqueInput, first: Int, last: Int): [Vote!]!
 }
 
 type ServerPayload {
@@ -87,10 +90,12 @@ type Version {
 
 type Vote {
   author: User!
+  createdAt: DateTime!
+  id: Int!
   server: Server!
-  timestamp: DateTime!
 }
 
 input VoteWhereUniqueInput {
-  timestamp: DateTime
+  createdAt: DateTime
+  id: Int
 }

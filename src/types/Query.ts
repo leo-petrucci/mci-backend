@@ -26,9 +26,10 @@ export const Query = queryType({
     t.list.field('feed', {
       type: 'Server',
       resolve: (parent, args, ctx) => {
-        return ctx.prisma.server.findMany({
-          where: { published: true },
-        })
+        const servers = ctx.prisma
+          .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, count("serverId") AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") GROUP BY s.id ORDER BY "voteCount" DESC;`
+        servers.then((res) => console.log(res))
+        return servers
       },
     })
 

@@ -17,7 +17,7 @@ import {
   getMciToken,
   getMciProfile,
 } from '../utils'
-let cookie = require("cookie")
+let cookie = require('cookie')
 
 const validationSchema = {
   title: object().shape({
@@ -49,20 +49,22 @@ export const Mutation = mutationType({
       type: 'String',
       args: {},
       resolve: async (_parent, {}, { res, req }) => {
-
         console.log(cookie.parse(req.header('Cookie')))
 
-        const securedToken = "a string";
+        const securedToken = 'a string'
 
-        var expiration = new Date();
-        expiration.setDate(expiration.getDate() + 7);
+        var expiration = new Date()
+        expiration.setDate(expiration.getDate() + 7)
 
-        res.cookie('rememberme', '1', { expires: new Date(Date.now() + 900000 * 4 * 24 * 7), httpOnly: true })
+        res.cookie('rememberme', '1', {
+          expires: new Date(Date.now() + 900000 * 4 * 24 * 7),
+          httpOnly: true,
+        })
 
-        return securedToken;
+        return securedToken
       },
-    })    
-    
+    })
+
     t.field('oAuthLogin', {
       type: 'AuthPayload',
       args: {
@@ -101,18 +103,24 @@ export const Mutation = mutationType({
           },
         })
 
-        const securedToken = sign({ userId: user.id, role: user.role }, APP_SECRET, {
-          expiresIn: '7d',
-        })
+        const securedToken = sign(
+          { userId: user.id, role: user.role },
+          APP_SECRET,
+          {
+            expiresIn: '7d',
+          },
+        )
 
-        ctx.res.cookie('token', securedToken, { expires: new Date(Date.now() + 900000 * 4 * 24 * 7), httpOnly: true })
+        ctx.res.cookie('token', securedToken, {
+          expires: new Date(Date.now() + 900000 * 4 * 24 * 7),
+          httpOnly: true,
+        })
 
         return {
           user,
         }
       },
     })
-    
 
     t.field('updateRole', {
       type: 'UserPayload',
@@ -401,6 +409,30 @@ export const Mutation = mutationType({
           },
         })
         return { server }
+      },
+    })
+
+    t.field('vote', {
+      type: 'Server',
+      nullable: true,
+      args: { id: intArg({ nullable: false }) },
+      resolve: (parent, { id }, ctx) => {
+        const userId = getUserId(ctx)
+
+        const vote = ctx.prisma.vote.create({
+          data: {
+            author: { connect: { id: Number(userId) } },
+            server: { connect: { id: Number(id) } },
+          },
+        })
+
+        vote.then((res) => console.log(res)).catch((err) => console.log(err))
+
+        return ctx.prisma.server.findOne({
+          where: {
+            id: Number(id),
+          },
+        })
       },
     })
   },

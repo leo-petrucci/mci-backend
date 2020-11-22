@@ -42,7 +42,8 @@ export const Version = objectType({
 export const Vote = objectType({
   name: 'Vote',
   definition(t) {
-    t.model.timestamp()
+    t.model.id()
+    t.model.createdAt()
     t.model.author()
     t.model.server()
   },
@@ -67,6 +68,8 @@ export const Server = objectType({
     t.model.version()
     t.model.slots()
     t.model.cover()
+    t.model.votes()
+    t.field('voteCount', { type: 'Int' })
   },
 })
 

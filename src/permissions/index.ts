@@ -114,5 +114,6 @@ export const permissions = shield({
       rules.fromMod,
       and(rules.isAuthenticatedUser, rules.isServerOwner),
     ),
+    vote: rules.isAuthenticatedUser,
   },
 })
