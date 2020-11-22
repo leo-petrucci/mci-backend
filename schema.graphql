@@ -6,6 +6,8 @@ type AuthPayload {
   user: User!
 }
 
+scalar DateTime
+
 type Mutation {
   addTag(id: Int!, tags: [String!]!): ServerPayload!
   createServer(content: String, cover: String, ip: String!, tags: [String!]!, title: String!): ServerPayload!
@@ -85,10 +87,10 @@ type Version {
 
 type Vote {
   author: User!
-  id: Int!
   server: Server!
+  timestamp: DateTime!
 }
 
 input VoteWhereUniqueInput {
-  id: Int
+  timestamp: DateTime
 }

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@nexus/schema": "0.15.0",
+    "@prisma/client": "^2.11.0",
     "@types/cookie": "^0.4.0",
     "aws-lambda": "^1.0.6",
     "axios": "^0.19.2",
