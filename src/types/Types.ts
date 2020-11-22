@@ -42,7 +42,7 @@ export const Version = objectType({
 export const Vote = objectType({
   name: 'Vote',
   definition(t) {
-    t.model.id()
+    t.model.timestamp()
     t.model.author()
     t.model.server()
   },
