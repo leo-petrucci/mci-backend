@@ -3,7 +3,7 @@ import { Context } from './context'
 import axios, { AxiosResponse } from 'axios'
 const qs = require('querystring')
 require('dotenv').config()
-const cookie = require("cookie")
+const cookie = require('cookie')
 
 export const APP_SECRET: string = process.env.APP_SECRET!
 
@@ -15,7 +15,7 @@ export function getUserId(context: Context) {
   const Authorization = cookie.parse(context.req.header('Cookie'))
   if (Authorization) {
     const { token } = Authorization
-    console.log("token is", token)
+    console.log('token is', token)
     try {
       console.log(verify(token, APP_SECRET))
       const verifiedToken = verify(token, APP_SECRET) as Token
