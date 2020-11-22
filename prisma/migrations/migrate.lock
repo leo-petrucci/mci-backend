@@ -1,3 +1,4 @@
 # Prisma Migrate lockfile v1
 
 20200917201433-initial-migration
+20201122121741-changed-primary-column-of-votes-to-timespamp

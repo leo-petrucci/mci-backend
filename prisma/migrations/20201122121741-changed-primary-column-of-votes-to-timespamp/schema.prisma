@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = ["postgres", "sqlite"]
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Server {
@@ -42,11 +42,11 @@ model Tag {
 }
 
 model Vote {
-  timestamp DateTime  @default(now()) @id
-  authorId  Int
-  serverId  Int
-  author    User      @relation(fields: [authorId], references: [id])
-  server    Server    @relation(fields: [serverId], references: [id])
+  timestamp       DateTime    @default(now()) @id
+  authorId Int
+  serverId Int
+  author   User   @relation(fields: [authorId], references: [id])
+  server   Server @relation(fields: [serverId], references: [id])
 }
 
 model Version {
