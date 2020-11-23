@@ -12,8 +12,8 @@ interface Token {
 }
 
 export function getUserId(context: Context) {
-  const Authorization = cookie.parse(context.req.header('Cookie'))
-  if (Authorization) {
+  if (context.req.header('Cookie')) {
+    const Authorization = cookie.parse(context.req.header('Cookie'))
     const { token } = Authorization
     console.log('token is', token)
     try {
@@ -21,22 +21,29 @@ export function getUserId(context: Context) {
       const verifiedToken = verify(token, APP_SECRET) as Token
       return verifiedToken && verifiedToken.userId
     } catch (error) {
-      console.log('auth error')
+      context.res.status(401)
       throw new Error('Could not authenticate user.')
     }
+  } else {
+    context.res.status(401)
   }
 }
 
 export async function getServerInfo(
   Ip: String,
+  context: Context,
 ): Promise<{ online: boolean; version: string; players: { max: number } }> {
   const { data } = await axios.get(`https://api.mcsrvstat.us/2/${Ip}`)
-  if (!data.online) throw new Error('Could not fetch server.')
+  if (!data.online) {
+    context.res.status(401)
+    throw new Error('Could not fetch server.')
+  }
   return data
 }
 
 export async function getMciToken(
   code: String,
+  context: Context,
 ): Promise<{
   access_token: string
   token_type: string
@@ -63,6 +70,7 @@ export async function getMciToken(
     .then((res) => res.data)
     .catch((error) => error.response.data)
   if (!data.access_token) {
+    context.res.status(401)
     throw new Error(
       `There was a problem fetching your token. ${data.error} - ${data.error_description}`,
     )

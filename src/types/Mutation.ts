@@ -73,7 +73,7 @@ export const Mutation = mutationType({
       resolve: async (_parent, { code }, ctx) => {
         let token
         try {
-          token = await getMciToken(code)
+          token = await getMciToken(code, ctx)
         } catch (error) {
           return error
         }
@@ -84,7 +84,7 @@ export const Mutation = mutationType({
         } catch (error) {
           return error
         }
-
+        console.log("it's getting up to here")
         const user = await ctx.prisma.user.upsert({
           where: { id: userProfile.id },
           create: {
@@ -102,6 +102,7 @@ export const Mutation = mutationType({
             posts: userProfile.posts,
           },
         })
+        console.log(user)
 
         const securedToken = sign(
           { userId: user.id, role: user.role },
@@ -170,6 +171,7 @@ export const Mutation = mutationType({
         try {
           await validationSchema.title.validate({ title })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -193,6 +195,7 @@ export const Mutation = mutationType({
         try {
           await validationSchema.content.validate({ content })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -216,6 +219,7 @@ export const Mutation = mutationType({
         try {
           await validationSchema.tags.validate({ tags })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -258,6 +262,7 @@ export const Mutation = mutationType({
         try {
           await validationSchema.cover.validate({ cover })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -281,7 +286,7 @@ export const Mutation = mutationType({
         let serverInfo
         // Fetch server info
         try {
-          serverInfo = await getServerInfo(ip)
+          serverInfo = await getServerInfo(ip, ctx)
         } catch (error) {
           return error
         }
@@ -306,7 +311,7 @@ export const Mutation = mutationType({
         let serverInfo
         // Fetch server info
         try {
-          serverInfo = await getServerInfo(ip)
+          serverInfo = await getServerInfo(ip, ctx)
         } catch (error) {
           return error
         }
@@ -348,6 +353,7 @@ export const Mutation = mutationType({
           await validationSchema.cover.validate({ cover })
           await validationSchema.tags.validate({ tags })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -357,7 +363,7 @@ export const Mutation = mutationType({
         if (!userId) throw new Error('Could not authenticate user.')
 
         // Fetch server info
-        let serverInfo = await getServerInfo(ip)
+        let serverInfo = await getServerInfo(ip, ctx)
         if (!serverInfo.online) throw new Error('Could not find server info.')
 
         // return create or connect version
@@ -422,6 +428,22 @@ export const Mutation = mutationType({
         const vote = ctx.prisma
           .$executeRaw`INSERT INTO "Vote" ("authorId", "serverId") VALUES (${userId}, ${id});`
 
+        return ctx.prisma.server.findOne({
+          where: {
+            id: Number(id),
+          },
+        })
+      },
+    })
+
+    t.field('resetVotes', {
+      type: 'ServerPayload',
+      nullable: true,
+      args: { id: intArg({ nullable: false }) },
+      resolve: async (parent, { id }, ctx): Promise<any> => {
+        const vote = await ctx.prisma.vote.deleteMany({
+          where: { serverId: id },
+        })
         return ctx.prisma.server.findOne({
           where: {
             id: Number(id),

@@ -70,6 +70,16 @@ describe('Permissions', () => {
     expect(res.body.errors).to.be.an('array')
     expect(res.body.errors[0].message).to.be.a('string', 'Not Authorised!')
   })
+  it("users can't reset votes", async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `mutation { resetVotes(id: 1") { title }`,
+      })
+    expect(res).to.have.status(400)
+  })
   it('admin can set users to mods', async () => {
     const res = await chai
       .request(app)
@@ -160,6 +170,16 @@ describe('Permissions', () => {
       })
     expect(res.body.errors).to.be.an('array')
     expect(res.body.errors[0].message).to.be.a('string', 'Not Authorised!')
+  })
+  it("mods can't reset votes", async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.ADMIN_TOKEN)
+      .send({
+        query: `mutation { resetVotes(id: 1") { title }`,
+      })
+    expect(res).to.have.status(400)
   })
   it("mods can edit servers they don't own", async () => {
     const res = await chai

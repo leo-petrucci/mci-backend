@@ -115,5 +115,6 @@ export const permissions = shield({
       and(rules.isAuthenticatedUser, rules.isServerOwner),
     ),
     vote: rules.isAuthenticatedUser,
+    resetVotes: rules.fromAdmin,
   },
 })

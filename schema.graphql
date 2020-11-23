@@ -15,6 +15,7 @@ type Mutation {
   oAuthLogin(code: String!): AuthPayload!
   publishServer(id: Int!): ServerPayload!
   removeTag(id: Int!, tag: String!): ServerPayload!
+  resetVotes(id: Int!): ServerPayload
   testResponse: String!
   updateBan(banned: Boolean!, id: Int!): UserPayload!
   updateContent(content: String!, id: Int!): ServerPayload!
