@@ -52,7 +52,15 @@ export const Vote = objectType({
 export const ServerPayload = objectType({
   name: 'ServerPayload',
   definition(t) {
-    t.field('server', { type: 'Server' })
+    t.field('id', { type: 'Int' })
+    t.field('published', { type: 'Boolean' })
+    t.field('title', { type: 'String' })
+    t.field('content', { type: 'String' })
+    t.field('author', { type: 'Int' })
+    t.field('tags', { type: 'Tag' })
+    t.field('version', { type: 'Version' })
+    t.field('slots', { type: 'Int' })
+    t.field('cover', { type: 'String' })
   },
 })
 

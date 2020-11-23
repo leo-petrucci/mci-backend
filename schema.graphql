@@ -23,7 +23,7 @@ type Mutation {
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!
   updateRole(id: Int!, role: String!): UserPayload!
   updateTitle(id: Int!, title: String!): ServerPayload!
-  vote(id: Int!): Server
+  vote(id: Int!): ServerPayload
 }
 
 type Query {
@@ -49,7 +49,15 @@ type Server {
 }
 
 type ServerPayload {
-  server: Server!
+  author: Int!
+  content: String!
+  cover: String!
+  id: Int!
+  published: Boolean!
+  slots: Int!
+  tags: Tag!
+  title: String!
+  version: Version!
 }
 
 input ServerWhereUniqueInput {

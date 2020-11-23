@@ -179,7 +179,7 @@ export const Mutation = mutationType({
             title,
           },
         })
-        return { server }
+        return server
       },
     })
 
@@ -383,7 +383,7 @@ export const Mutation = mutationType({
     t.field('deleteServer', {
       type: 'ServerPayload',
       args: { id: intArg({ nullable: false }) },
-      resolve: (parent, { id }, ctx) => {
+      resolve: async (parent, { id }, ctx): Promise<any> => {
         const server = ctx.prisma.server.update({
           where: {
             id,
@@ -399,7 +399,7 @@ export const Mutation = mutationType({
     t.field('publishServer', {
       type: 'ServerPayload',
       args: { id: intArg({ nullable: false }) },
-      resolve: (parent, { id }, ctx) => {
+      resolve: async (parent, { id }, ctx): Promise<any> => {
         const server = ctx.prisma.server.update({
           where: {
             id,
@@ -413,20 +413,14 @@ export const Mutation = mutationType({
     })
 
     t.field('vote', {
-      type: 'Server',
+      type: 'ServerPayload',
       nullable: true,
       args: { id: intArg({ nullable: false }) },
-      resolve: (parent, { id }, ctx) => {
+      resolve: async (parent, { id }, ctx): Promise<any> => {
         const userId = getUserId(ctx)
 
-        const vote = ctx.prisma.vote.create({
-          data: {
-            author: { connect: { id: Number(userId) } },
-            server: { connect: { id: Number(id) } },
-          },
-        })
-
-        vote.then((res) => console.log(res)).catch((err) => console.log(err))
+        const vote = ctx.prisma
+          .$executeRaw`INSERT INTO "Vote" ("authorId", "serverId") VALUES (${userId}, ${id});`
 
         return ctx.prisma.server.findOne({
           where: {
