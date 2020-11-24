@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgres"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Server {
@@ -43,7 +43,7 @@ model Tag {
 }
 
 model Vote {
-  id        Int      @default(autoincrement()) @unique
+  id        Int      @default(autoincrement())
   createdAt DateTime @default(now()) @id
   authorId  Int
   serverId  Int

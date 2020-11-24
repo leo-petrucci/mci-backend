@@ -17,7 +17,7 @@ import {
   getMciToken,
   getMciProfile,
 } from '../utils'
-let cookie = require("cookie")
+let cookie = require('cookie')
 
 const validationSchema = {
   title: object().shape({
@@ -49,20 +49,22 @@ export const Mutation = mutationType({
       type: 'String',
       args: {},
       resolve: async (_parent, {}, { res, req }) => {
-
         console.log(cookie.parse(req.header('Cookie')))
 
-        const securedToken = "a string";
+        const securedToken = 'a string'
 
-        var expiration = new Date();
-        expiration.setDate(expiration.getDate() + 7);
+        var expiration = new Date()
+        expiration.setDate(expiration.getDate() + 7)
 
-        res.cookie('rememberme', '1', { expires: new Date(Date.now() + 900000 * 4 * 24 * 7), httpOnly: true })
+        res.cookie('rememberme', '1', {
+          expires: new Date(Date.now() + 900000 * 4 * 24 * 7),
+          httpOnly: true,
+        })
 
-        return securedToken;
+        return securedToken
       },
-    })    
-    
+    })
+
     t.field('oAuthLogin', {
       type: 'AuthPayload',
       args: {
@@ -71,7 +73,7 @@ export const Mutation = mutationType({
       resolve: async (_parent, { code }, ctx) => {
         let token
         try {
-          token = await getMciToken(code)
+          token = await getMciToken(code, ctx)
         } catch (error) {
           return error
         }
@@ -82,7 +84,6 @@ export const Mutation = mutationType({
         } catch (error) {
           return error
         }
-
         const user = await ctx.prisma.user.upsert({
           where: { id: userProfile.id },
           create: {
@@ -101,18 +102,24 @@ export const Mutation = mutationType({
           },
         })
 
-        const securedToken = sign({ userId: user.id, role: user.role }, APP_SECRET, {
-          expiresIn: '7d',
-        })
+        const securedToken = sign(
+          { userId: user.id, role: user.role },
+          APP_SECRET,
+          {
+            expiresIn: '7d',
+          },
+        )
 
-        ctx.res.cookie('token', securedToken, { expires: new Date(Date.now() + 900000 * 4 * 24 * 7), httpOnly: true })
+        ctx.res.cookie('token', securedToken, {
+          expires: new Date(Date.now() + 900000 * 4 * 24 * 7),
+          httpOnly: true,
+        })
 
         return {
           user,
         }
       },
     })
-    
 
     t.field('updateRole', {
       type: 'UserPayload',
@@ -162,6 +169,7 @@ export const Mutation = mutationType({
         try {
           await validationSchema.title.validate({ title })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -171,7 +179,7 @@ export const Mutation = mutationType({
             title,
           },
         })
-        return { server }
+        return server
       },
     })
 
@@ -185,6 +193,7 @@ export const Mutation = mutationType({
         try {
           await validationSchema.content.validate({ content })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -208,6 +217,7 @@ export const Mutation = mutationType({
         try {
           await validationSchema.tags.validate({ tags })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -250,6 +260,7 @@ export const Mutation = mutationType({
         try {
           await validationSchema.cover.validate({ cover })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -273,7 +284,7 @@ export const Mutation = mutationType({
         let serverInfo
         // Fetch server info
         try {
-          serverInfo = await getServerInfo(ip)
+          serverInfo = await getServerInfo(ip, ctx)
         } catch (error) {
           return error
         }
@@ -298,7 +309,7 @@ export const Mutation = mutationType({
         let serverInfo
         // Fetch server info
         try {
-          serverInfo = await getServerInfo(ip)
+          serverInfo = await getServerInfo(ip, ctx)
         } catch (error) {
           return error
         }
@@ -340,6 +351,7 @@ export const Mutation = mutationType({
           await validationSchema.cover.validate({ cover })
           await validationSchema.tags.validate({ tags })
         } catch (e) {
+          ctx.res.status(400)
           return new Error(e.errors[0])
         }
 
@@ -349,7 +361,7 @@ export const Mutation = mutationType({
         if (!userId) throw new Error('Could not authenticate user.')
 
         // Fetch server info
-        let serverInfo = await getServerInfo(ip)
+        let serverInfo = await getServerInfo(ip, ctx)
         if (!serverInfo.online) throw new Error('Could not find server info.')
 
         // return create or connect version
@@ -375,7 +387,7 @@ export const Mutation = mutationType({
     t.field('deleteServer', {
       type: 'ServerPayload',
       args: { id: intArg({ nullable: false }) },
-      resolve: (parent, { id }, ctx) => {
+      resolve: async (parent, { id }, ctx): Promise<any> => {
         const server = ctx.prisma.server.update({
           where: {
             id,
@@ -391,7 +403,7 @@ export const Mutation = mutationType({
     t.field('publishServer', {
       type: 'ServerPayload',
       args: { id: intArg({ nullable: false }) },
-      resolve: (parent, { id }, ctx) => {
+      resolve: async (parent, { id }, ctx): Promise<any> => {
         const server = ctx.prisma.server.update({
           where: {
             id,
@@ -401,6 +413,40 @@ export const Mutation = mutationType({
           },
         })
         return { server }
+      },
+    })
+
+    t.field('vote', {
+      type: 'ServerPayload',
+      nullable: true,
+      args: { id: intArg({ nullable: false }) },
+      resolve: async (parent, { id }, ctx): Promise<any> => {
+        const userId = getUserId(ctx)
+
+        const vote = ctx.prisma
+          .$executeRaw`INSERT INTO "Vote" ("authorId", "serverId") VALUES (${userId}, ${id});`
+
+        return ctx.prisma.server.findOne({
+          where: {
+            id: Number(id),
+          },
+        })
+      },
+    })
+
+    t.field('resetVotes', {
+      type: 'ServerPayload',
+      nullable: true,
+      args: { id: intArg({ nullable: false }) },
+      resolve: async (parent, { id }, ctx): Promise<any> => {
+        const vote = await ctx.prisma.vote.deleteMany({
+          where: { serverId: id },
+        })
+        return ctx.prisma.server.findOne({
+          where: {
+            id: Number(id),
+          },
+        })
       },
     })
   },

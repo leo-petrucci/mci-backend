@@ -10,10 +10,11 @@
     "generate": "npm -s run generate:prisma && npm -s run generate:nexus",
     "generate:prisma": "prisma generate",
     "generate:nexus": "ts-node --transpile-only src/schema",
-    "dev": "ts-node-dev -r dotenv/config --no-notify --respawn --transpileOnly src/server"
+    "dev": "ts-node-dev --exit-child --no-notify --respawn --transpileOnly src/server"
   },
   "dependencies": {
     "@nexus/schema": "0.15.0",
+    "@prisma/client": "^2.11.0",
     "@types/cookie": "^0.4.0",
     "aws-lambda": "^1.0.6",
     "axios": "^0.19.2",
@@ -32,6 +33,7 @@
     "yup": "^0.29.3"
   },
   "devDependencies": {
+    "@prisma/cli": "^2.11.0",
     "@types/bcryptjs": "2.4.2",
     "@types/jsonwebtoken": "8.5.0",
     "@types/mocha": "^8.0.4",

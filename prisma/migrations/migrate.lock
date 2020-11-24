@@ -1,3 +1,5 @@
 # Prisma Migrate lockfile v1
 
-20200917201433-initial-migration
+20201122153618-init
+20201122153749-set-created-at-as-id
+20201122154116-making-vode-id-unique
