@@ -1,5 +1,5 @@
 import { intArg, queryType, stringArg } from '@nexus/schema'
-import { getUserId } from '../utils'
+import { getDates, getUserId } from '../utils'
 
 export const Query = queryType({
   definition(t) {
@@ -25,9 +25,17 @@ export const Query = queryType({
 
     t.list.field('feed', {
       type: 'Server',
-      resolve: async (parent, args, ctx) => {
-        const servers = await ctx.prisma
-          .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, count("serverId") AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") GROUP BY s.id ORDER BY "voteCount" DESC;`
+      args: {
+        date: stringArg({ default: new Date().toISOString(), nullable: false }),
+      },
+      resolve: (parent, { date }, ctx) => {
+        const [d, f] = getDates(date)
+        const servers = ctx.prisma
+          .$queryRaw`SELECT s.id, s.title, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
+          THEN 1 ELSE 0 END ) AS "voteCount" 
+          FROM "Server" AS s 
+          LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
+          GROUP BY s.id ORDER BY "voteCount" DESC;`
         return servers
       },
     })
@@ -35,13 +43,16 @@ export const Query = queryType({
     t.list.field('searchServers', {
       type: 'Server',
       args: {
+        date: stringArg({ default: new Date().toISOString(), nullable: false }),
         searchString: stringArg({ nullable: true }),
       },
-      resolve: async (parent, { searchString }, ctx) => {
+      resolve: async (parent, { searchString, date }, ctx) => {
+        const [d, f] = getDates(date)
         return await ctx.prisma
-          .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, count("serverId") AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE title LIKE ${
-          '%' + searchString + '%'
-        } OR content LIKE ${
+          .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
+          THEN 1 ELSE 0 END ) AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE title LIKE ${
+            '%' + searchString + '%'
+          } OR content LIKE ${
           '%' + searchString + '%'
         } GROUP BY s.id ORDER BY "voteCount" DESC;`
       },
@@ -50,10 +61,15 @@ export const Query = queryType({
     t.field('server', {
       type: 'Server',
       nullable: true,
-      args: { id: intArg() },
-      resolve: async (parent, { id }, ctx) => {
+      args: {
+        id: intArg(),
+        date: stringArg({ default: new Date().toISOString(), nullable: false }),
+      },
+      resolve: async (parent, { id, date }, ctx) => {
+        const [d, f] = getDates(date)
         const servers = await ctx.prisma
-          .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, count("serverId") AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE s.id = ${id} GROUP BY s.id LIMIT 1;`
+          .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
+          THEN 1 ELSE 0 END ) AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE s.id = ${id} GROUP BY s.id LIMIT 1;`
         return servers[0]
       },
     })

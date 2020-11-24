@@ -158,3 +158,16 @@ export async function getTagsQuery(
   })
   return data
 }
+
+export function getDates(current: string): Date[] {
+  let d = new Date(current)
+  d.setDate(1)
+  d.setHours(0)
+  d.setMinutes(0)
+  d.setSeconds(0)
+  d.setUTCMilliseconds(0)
+  let f = new Date(d.toISOString())
+  const fm = f.getMonth()
+  f.setMonth(fm + 1)
+  return [d, f]
+}

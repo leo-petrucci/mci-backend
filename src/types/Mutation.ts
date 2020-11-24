@@ -84,7 +84,6 @@ export const Mutation = mutationType({
         } catch (error) {
           return error
         }
-        console.log("it's getting up to here")
         const user = await ctx.prisma.user.upsert({
           where: { id: userProfile.id },
           create: {
@@ -102,7 +101,6 @@ export const Mutation = mutationType({
             posts: userProfile.posts,
           },
         })
-        console.log(user)
 
         const securedToken = sign(
           { userId: user.id, role: user.role },
