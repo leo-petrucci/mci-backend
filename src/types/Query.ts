@@ -27,15 +27,18 @@ export const Query = queryType({
       type: 'Server',
       args: {
         date: stringArg({ default: new Date().toISOString(), nullable: false }),
+        page: intArg({ default: 0, nullable: false }),
       },
-      resolve: (parent, { date }, ctx) => {
+      resolve: (parent, { date, page }, ctx) => {
+        const pageLimit = 10
         const [d, f] = getDates(date)
         const servers = ctx.prisma
           .$queryRaw`SELECT s.id, s.title, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount" 
           FROM "Server" AS s 
-          LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
-          GROUP BY s.id ORDER BY "voteCount" DESC;`
+          LEFT JOIN "Vote" AS v ON (s.id = "serverId")
+          GROUP BY s.id ORDER BY "voteCount" DESC
+          OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;`
         return servers
       },
     })
