@@ -48,16 +48,19 @@ export const Query = queryType({
       args: {
         date: stringArg({ default: new Date().toISOString(), nullable: false }),
         searchString: stringArg({ nullable: true }),
+        page: intArg({ default: 0, nullable: false }),
       },
-      resolve: async (parent, { searchString, date }, ctx) => {
+      resolve: async (parent, { searchString, date, page }, ctx) => {
         const [d, f] = getDates(date)
+        const pageLimit = 10
         return await ctx.prisma
           .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE title LIKE ${
             '%' + searchString + '%'
           } OR content LIKE ${
           '%' + searchString + '%'
-        } GROUP BY s.id ORDER BY "voteCount" DESC;`
+        } GROUP BY s.id ORDER BY "voteCount" DESC
+        OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;;`
       },
     })
 
