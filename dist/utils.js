@@ -36,27 +36,34 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.getTagsQuery = exports.getVersionQuery = exports.getMciProfile = exports.getMciToken = exports.getServerInfo = exports.getUserId = exports.APP_SECRET = void 0;
+exports.getDates = exports.getTagsQuery = exports.getVersionQuery = exports.getMciProfile = exports.getMciToken = exports.getServerInfo = exports.getUserId = exports.APP_SECRET = void 0;
 var jsonwebtoken_1 = require("jsonwebtoken");
 var axios_1 = require("axios");
 var qs = require('querystring');
-exports.APP_SECRET = 'appsecret321';
+require('dotenv').config();
+var cookie = require('cookie');
+exports.APP_SECRET = process.env.APP_SECRET;
 function getUserId(context) {
-    var Authorization = context.request.get('Authorization');
-    if (Authorization) {
-        var token = Authorization.replace('Bearer ', '');
+    if (context.req.header('Cookie')) {
+        var Authorization = cookie.parse(context.req.header('Cookie'));
+        var token = Authorization.token;
+        console.log('token is', token);
         try {
+            console.log(jsonwebtoken_1.verify(token, exports.APP_SECRET));
             var verifiedToken = jsonwebtoken_1.verify(token, exports.APP_SECRET);
             return verifiedToken && verifiedToken.userId;
         }
         catch (error) {
-            console.log('auth error');
+            context.res.status(401);
             throw new Error('Could not authenticate user.');
         }
     }
+    else {
+        context.res.status(401);
+    }
 }
 exports.getUserId = getUserId;
-function getServerInfo(Ip) {
+function getServerInfo(Ip, context) {
     return __awaiter(this, void 0, void 0, function () {
         var data;
         return __generator(this, function (_a) {
@@ -64,15 +71,17 @@ function getServerInfo(Ip) {
                 case 0: return [4 /*yield*/, axios_1["default"].get("https://api.mcsrvstat.us/2/" + Ip)];
                 case 1:
                     data = (_a.sent()).data;
-                    if (!data.online)
+                    if (!data.online) {
+                        context.res.status(401);
                         throw new Error('Could not fetch server.');
+                    }
                     return [2 /*return*/, data];
             }
         });
     });
 }
 exports.getServerInfo = getServerInfo;
-function getMciToken(code) {
+function getMciToken(code, context) {
     return __awaiter(this, void 0, void 0, function () {
         var data;
         return __generator(this, function (_a) {
@@ -94,6 +103,7 @@ function getMciToken(code) {
                 case 1:
                     data = _a.sent();
                     if (!data.access_token) {
+                        context.res.status(401);
                         throw new Error("There was a problem fetching your token. " + data.error + " - " + data.error_description);
                     }
                     return [2 /*return*/, data];
@@ -202,3 +212,16 @@ function getTagsQuery(context, tags) {
     });
 }
 exports.getTagsQuery = getTagsQuery;
+function getDates(current) {
+    var d = new Date(current);
+    d.setDate(1);
+    d.setHours(0);
+    d.setMinutes(0);
+    d.setSeconds(0);
+    d.setUTCMilliseconds(0);
+    var f = new Date(d.toISOString());
+    var fm = f.getMonth();
+    f.setMonth(fm + 1);
+    return [d, f];
+}
+exports.getDates = getDates;

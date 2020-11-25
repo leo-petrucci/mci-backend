@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url = "***"
+}
+
+model Server {
+  id        Int     @default(autoincrement()) @id
+  title     String
+  content   String?
+  published Boolean @default(false)
+  createdAt DateTime @default(now())
+  cover     String?
+  slots     Int
+  ip        String  @default("")
+  author    User    @relation(fields: [authorId], references: [id])
+  authorId  Int
+  version   Version @relation(fields: [versionId], references: [id])
+  versionId Int
+  tags      Tag[]
+  votes     Vote[]
+}
+
+model User {
+  id       Int      @id
+  email    String   @unique
+  username String
+  role     String
+  photoUrl String   @default("")
+  posts    Int      @default(0)
+  banned   Boolean  @default(false)
+  Votes    Vote[]
+  Servers  Server[]
+}
+
+model Tag {
+  id      Int      @default(autoincrement()) @id
+  tagName String   @unique
+  Servers Server[]
+}
+
+model Vote {
+  id        Int      @default(autoincrement()) @unique
+  createdAt DateTime @default(now()) @id
+  authorId  Int
+  serverId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  server    Server   @relation(fields: [serverId], references: [id])
+}
+
+model Version {
+  id          Int      @default(autoincrement()) @id
+  versionName String   @unique
+  Servers     Server[]
+}

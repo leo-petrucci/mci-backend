@@ -1,4 +1,8 @@
 "use strict";
+var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -38,11 +42,57 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.Mutation = void 0;
 var schema_1 = require("@nexus/schema");
+var yup_1 = require("yup");
 var jsonwebtoken_1 = require("jsonwebtoken");
 var utils_1 = require("../utils");
+var cookie = require('cookie');
+var validationSchema = {
+    title: yup_1.object().shape({
+        title: yup_1.string()
+            .min(10, 'Title must be at least 10 characters long.')
+            .max(280, 'Title must be less than 280 characters long.')
+    }),
+    tags: yup_1.object().shape({
+        tags: yup_1.array().min(1, 'You need to specify at least one tag to add.')
+    }),
+    removeTag: yup_1.object().shape({
+        tags: yup_1.array().min(1, 'You need to specify at least one tag to remove.')
+    }),
+    cover: yup_1.object().shape({
+        cover: yup_1.string()
+            .url('Cover needs to be an url.')
+            .matches(/[/.](gif|jpg|jpeg|tiff|png)$/, 'Cover needs to be an image.')
+    }),
+    content: yup_1.object().shape({
+        content: yup_1.string()
+            .min(280, 'Content must be at least 280 characters long.')
+            .max(10000, 'Content must be less than 10000 characters long.')
+    })
+};
 exports.Mutation = schema_1.mutationType({
     definition: function (t) {
         var _this = this;
+        t.field('testResponse', {
+            type: 'String',
+            args: {},
+            resolve: function (_parent, _a, _b) {
+                var res = _b.res, req = _b.req;
+                return __awaiter(_this, void 0, void 0, function () {
+                    var securedToken, expiration;
+                    return __generator(this, function (_c) {
+                        console.log(cookie.parse(req.header('Cookie')));
+                        securedToken = 'a string';
+                        expiration = new Date();
+                        expiration.setDate(expiration.getDate() + 7);
+                        res.cookie('rememberme', '1', {
+                            expires: new Date(Date.now() + 900000 * 4 * 24 * 7),
+                            httpOnly: true
+                        });
+                        return [2 /*return*/, securedToken];
+                    });
+                });
+            }
+        });
         t.field('oAuthLogin', {
             type: 'AuthPayload',
             args: {
@@ -51,12 +101,12 @@ exports.Mutation = schema_1.mutationType({
             resolve: function (_parent, _a, ctx) {
                 var code = _a.code;
                 return __awaiter(_this, void 0, void 0, function () {
-                    var token, error_1, userProfile, error_2, user;
+                    var token, error_1, userProfile, error_2, user, securedToken;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
                             case 0:
                                 _b.trys.push([0, 2, , 3]);
-                                return [4 /*yield*/, utils_1.getMciToken(code)];
+                                return [4 /*yield*/, utils_1.getMciToken(code, ctx)];
                             case 1:
                                 token = _b.sent();
                                 return [3 /*break*/, 3];
@@ -91,8 +141,14 @@ exports.Mutation = schema_1.mutationType({
                                 })];
                             case 7:
                                 user = _b.sent();
+                                securedToken = jsonwebtoken_1.sign({ userId: user.id, role: user.role }, utils_1.APP_SECRET, {
+                                    expiresIn: '7d'
+                                });
+                                ctx.res.cookie('token', securedToken, {
+                                    expires: new Date(Date.now() + 900000 * 4 * 24 * 7),
+                                    httpOnly: true
+                                });
                                 return [2 /*return*/, {
-                                        token: jsonwebtoken_1.sign({ userId: user.id, role: user.role }, utils_1.APP_SECRET),
                                         user: user
                                     }];
                         }
@@ -165,16 +221,62 @@ exports.Mutation = schema_1.mutationType({
             resolve: function (parent, _a, ctx) {
                 var title = _a.title, id = _a.id;
                 return __awaiter(_this, void 0, void 0, function () {
-                    var server;
+                    var e_1, server;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
-                            case 0: return [4 /*yield*/, ctx.prisma.server.update({
+                            case 0:
+                                _b.trys.push([0, 2, , 3]);
+                                return [4 /*yield*/, validationSchema.title.validate({ title: title })];
+                            case 1:
+                                _b.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                e_1 = _b.sent();
+                                ctx.res.status(400);
+                                return [2 /*return*/, new Error(e_1.errors[0])];
+                            case 3: return [4 /*yield*/, ctx.prisma.server.update({
                                     where: { id: id },
                                     data: {
                                         title: title
                                     }
                                 })];
+                            case 4:
+                                server = _b.sent();
+                                return [2 /*return*/, server];
+                        }
+                    });
+                });
+            }
+        });
+        t.field('updateContent', {
+            type: 'ServerPayload',
+            args: {
+                id: schema_1.intArg({ nullable: false }),
+                content: schema_1.stringArg({ nullable: false })
+            },
+            resolve: function (parent, _a, ctx) {
+                var content = _a.content, id = _a.id;
+                return __awaiter(_this, void 0, void 0, function () {
+                    var e_2, server;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                _b.trys.push([0, 2, , 3]);
+                                return [4 /*yield*/, validationSchema.content.validate({ content: content })];
                             case 1:
+                                _b.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                e_2 = _b.sent();
+                                ctx.res.status(400);
+                                return [2 /*return*/, new Error(e_2.errors[0])];
+                            case 3: return [4 /*yield*/, ctx.prisma.server.update({
+                                    where: { id: id },
+                                    data: {
+                                        content: content
+                                    }
+                                })];
+                            case 4:
                                 server = _b.sent();
                                 return [2 /*return*/, { server: server }];
                         }
@@ -191,11 +293,21 @@ exports.Mutation = schema_1.mutationType({
             resolve: function (parent, _a, ctx) {
                 var id = _a.id, tags = _a.tags;
                 return __awaiter(_this, void 0, void 0, function () {
-                    var tagObjects, server;
+                    var e_3, tagObjects, server;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
-                            case 0: return [4 /*yield*/, utils_1.getTagsQuery(ctx, tags)];
+                            case 0:
+                                _b.trys.push([0, 2, , 3]);
+                                return [4 /*yield*/, validationSchema.tags.validate({ tags: tags })];
                             case 1:
+                                _b.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                e_3 = _b.sent();
+                                ctx.res.status(400);
+                                return [2 /*return*/, new Error(e_3.errors[0])];
+                            case 3: return [4 /*yield*/, utils_1.getTagsQuery(ctx, tags)];
+                            case 4:
                                 tagObjects = _b.sent();
                                 return [4 /*yield*/, ctx.prisma.server.update({
                                         where: { id: id },
@@ -203,7 +315,7 @@ exports.Mutation = schema_1.mutationType({
                                             tags: tagObjects
                                         }
                                     })];
-                            case 2:
+                            case 5:
                                 server = _b.sent();
                                 return [2 /*return*/, { server: server }];
                         }
@@ -220,19 +332,15 @@ exports.Mutation = schema_1.mutationType({
             resolve: function (parent, _a, ctx) {
                 var id = _a.id, tag = _a.tag;
                 return __awaiter(_this, void 0, void 0, function () {
-                    var userId, server;
+                    var server;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
-                            case 0:
-                                userId = utils_1.getUserId(ctx);
-                                if (!userId)
-                                    throw new Error('Could not authenticate user.');
-                                return [4 /*yield*/, ctx.prisma.server.update({
-                                        where: { id: id },
-                                        data: {
-                                            tags: { disconnect: [{ tagName: tag }] }
-                                        }
-                                    })];
+                            case 0: return [4 /*yield*/, ctx.prisma.server.update({
+                                    where: { id: id },
+                                    data: {
+                                        tags: { disconnect: [{ tagName: tag }] }
+                                    }
+                                })];
                             case 1:
                                 server = _b.sent();
                                 return [2 /*return*/, { server: server }];
@@ -250,20 +358,26 @@ exports.Mutation = schema_1.mutationType({
             resolve: function (parent, _a, ctx) {
                 var id = _a.id, cover = _a.cover;
                 return __awaiter(_this, void 0, void 0, function () {
-                    var userId, server;
+                    var e_4, server;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
                             case 0:
-                                userId = utils_1.getUserId(ctx);
-                                if (!userId)
-                                    throw new Error('Could not authenticate user.');
-                                return [4 /*yield*/, ctx.prisma.server.update({
-                                        where: { id: id },
-                                        data: {
-                                            cover: cover
-                                        }
-                                    })];
+                                _b.trys.push([0, 2, , 3]);
+                                return [4 /*yield*/, validationSchema.cover.validate({ cover: cover })];
                             case 1:
+                                _b.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                e_4 = _b.sent();
+                                ctx.res.status(400);
+                                return [2 /*return*/, new Error(e_4.errors[0])];
+                            case 3: return [4 /*yield*/, ctx.prisma.server.update({
+                                    where: { id: id },
+                                    data: {
+                                        cover: cover
+                                    }
+                                })];
+                            case 4:
                                 server = _b.sent();
                                 return [2 /*return*/, { server: server }];
                         }
@@ -285,7 +399,7 @@ exports.Mutation = schema_1.mutationType({
                         switch (_b.label) {
                             case 0:
                                 _b.trys.push([0, 2, , 3]);
-                                return [4 /*yield*/, utils_1.getServerInfo(ip)];
+                                return [4 /*yield*/, utils_1.getServerInfo(ip, ctx)];
                             case 1:
                                 serverInfo = _b.sent();
                                 return [3 /*break*/, 3];
@@ -320,7 +434,7 @@ exports.Mutation = schema_1.mutationType({
                         switch (_b.label) {
                             case 0:
                                 _b.trys.push([0, 2, , 3]);
-                                return [4 /*yield*/, utils_1.getServerInfo(ip)];
+                                return [4 /*yield*/, utils_1.getServerInfo(ip, ctx)];
                             case 1:
                                 serverInfo = _b.sent();
                                 return [3 /*break*/, 3];
@@ -358,24 +472,44 @@ exports.Mutation = schema_1.mutationType({
             resolve: function (parent, _a, ctx) {
                 var title = _a.title, content = _a.content, cover = _a.cover, tags = _a.tags, ip = _a.ip;
                 return __awaiter(_this, void 0, void 0, function () {
-                    var userId, tagObjects, serverInfo, versionQuery, server;
+                    var userId, e_5, tagObjects, serverInfo, versionQuery, server;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
                             case 0:
                                 userId = utils_1.getUserId(ctx);
-                                return [4 /*yield*/, utils_1.getTagsQuery(ctx, tags)];
+                                _b.label = 1;
                             case 1:
+                                _b.trys.push([1, 6, , 7]);
+                                return [4 /*yield*/, validationSchema.title.validate({ title: title })];
+                            case 2:
+                                _b.sent();
+                                return [4 /*yield*/, validationSchema.content.validate({ content: content })];
+                            case 3:
+                                _b.sent();
+                                return [4 /*yield*/, validationSchema.cover.validate({ cover: cover })];
+                            case 4:
+                                _b.sent();
+                                return [4 /*yield*/, validationSchema.tags.validate({ tags: tags })];
+                            case 5:
+                                _b.sent();
+                                return [3 /*break*/, 7];
+                            case 6:
+                                e_5 = _b.sent();
+                                ctx.res.status(400);
+                                return [2 /*return*/, new Error(e_5.errors[0])];
+                            case 7: return [4 /*yield*/, utils_1.getTagsQuery(ctx, tags)];
+                            case 8:
                                 tagObjects = _b.sent();
                                 console.log('tags', tagObjects);
                                 if (!userId)
                                     throw new Error('Could not authenticate user.');
-                                return [4 /*yield*/, utils_1.getServerInfo(ip)];
-                            case 2:
+                                return [4 /*yield*/, utils_1.getServerInfo(ip, ctx)];
+                            case 9:
                                 serverInfo = _b.sent();
                                 if (!serverInfo.online)
                                     throw new Error('Could not find server info.');
                                 return [4 /*yield*/, utils_1.getVersionQuery(ctx, serverInfo.version)];
-                            case 3:
+                            case 10:
                                 versionQuery = _b.sent();
                                 console.log('versionQuery', versionQuery);
                                 return [4 /*yield*/, ctx.prisma.server.create({
@@ -391,7 +525,7 @@ exports.Mutation = schema_1.mutationType({
                                             author: { connect: { id: Number(userId) } }
                                         }
                                     })];
-                            case 4:
+                            case 11:
                                 server = _b.sent();
                                 return [2 /*return*/, { server: server }];
                         }
@@ -404,15 +538,20 @@ exports.Mutation = schema_1.mutationType({
             args: { id: schema_1.intArg({ nullable: false }) },
             resolve: function (parent, _a, ctx) {
                 var id = _a.id;
-                var server = ctx.prisma.server.update({
-                    where: {
-                        id: id
-                    },
-                    data: {
-                        published: true
-                    }
+                return __awaiter(_this, void 0, void 0, function () {
+                    var server;
+                    return __generator(this, function (_b) {
+                        server = ctx.prisma.server.update({
+                            where: {
+                                id: id
+                            },
+                            data: {
+                                published: true
+                            }
+                        });
+                        return [2 /*return*/, { server: server }];
+                    });
                 });
-                return { server: server };
             }
         });
         t.field('publishServer', {
@@ -420,16 +559,68 @@ exports.Mutation = schema_1.mutationType({
             args: { id: schema_1.intArg({ nullable: false }) },
             resolve: function (parent, _a, ctx) {
                 var id = _a.id;
-                var server = ctx.prisma.server.update({
-                    where: {
-                        id: id
-                    },
-                    data: {
-                        published: true
-                    }
+                return __awaiter(_this, void 0, void 0, function () {
+                    var server;
+                    return __generator(this, function (_b) {
+                        server = ctx.prisma.server.update({
+                            where: {
+                                id: id
+                            },
+                            data: {
+                                published: true
+                            }
+                        });
+                        return [2 /*return*/, { server: server }];
+                    });
                 });
-                return { server: server };
+            }
+        });
+        t.field('vote', {
+            type: 'ServerPayload',
+            nullable: true,
+            args: { id: schema_1.intArg({ nullable: false }) },
+            resolve: function (parent, _a, ctx) {
+                var id = _a.id;
+                return __awaiter(_this, void 0, void 0, function () {
+                    var userId, vote;
+                    return __generator(this, function (_b) {
+                        userId = utils_1.getUserId(ctx);
+                        vote = ctx.prisma
+                            .$executeRaw(templateObject_1 || (templateObject_1 = __makeTemplateObject(["INSERT INTO \"Vote\" (\"authorId\", \"serverId\") VALUES (", ", ", ");"], ["INSERT INTO \"Vote\" (\"authorId\", \"serverId\") VALUES (", ", ", ");"])), userId, id);
+                        return [2 /*return*/, ctx.prisma.server.findOne({
+                                where: {
+                                    id: Number(id)
+                                }
+                            })];
+                    });
+                });
+            }
+        });
+        t.field('resetVotes', {
+            type: 'ServerPayload',
+            nullable: true,
+            args: { id: schema_1.intArg({ nullable: false }) },
+            resolve: function (parent, _a, ctx) {
+                var id = _a.id;
+                return __awaiter(_this, void 0, void 0, function () {
+                    var vote;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0: return [4 /*yield*/, ctx.prisma.vote.deleteMany({
+                                    where: { serverId: id }
+                                })];
+                            case 1:
+                                vote = _b.sent();
+                                return [2 /*return*/, ctx.prisma.server.findOne({
+                                        where: {
+                                            id: Number(id)
+                                        }
+                                    })];
+                        }
+                    });
+                });
             }
         });
     }
 });
+var templateObject_1;

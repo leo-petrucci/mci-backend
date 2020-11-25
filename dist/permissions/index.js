@@ -53,7 +53,6 @@ var rules = {
                         })];
                 case 1:
                     user = _a.sent();
-                    console.log('is authenticated and unbanned', Boolean(userId) && !user.banned);
                     return [2 /*return*/, Boolean(userId) && !user.banned];
             }
         });
@@ -103,7 +102,7 @@ var rules = {
             });
         });
     }),
-    isMod: graphql_shield_1.rule()(function (parent, _a, context) {
+    fromMod: graphql_shield_1.rule()(function (parent, _a, context) {
         var id = _a.id;
         return __awaiter(void 0, void 0, void 0, function () {
             var userId, user;
@@ -124,7 +123,7 @@ var rules = {
             });
         });
     }),
-    isAdmin: graphql_shield_1.rule()(function (parent, _a, context) {
+    fromAdmin: graphql_shield_1.rule()(function (parent, _a, context) {
         var id = _a.id;
         return __awaiter(void 0, void 0, void 0, function () {
             var userId, user;
@@ -136,10 +135,52 @@ var rules = {
                                 where: {
                                     id: Number(userId)
                                 }
-                            })];
+                            })
+                            // console.log('is admin', user.role === 'admin')
+                        ];
                     case 1:
                         user = _b.sent();
-                        console.log('is admin', user.role === 'admin');
+                        // console.log('is admin', user.role === 'admin')
+                        return [2 /*return*/, user.role === 'admin'];
+                }
+            });
+        });
+    }),
+    isMod: graphql_shield_1.rule()(function (parent, _a, context) {
+        var id = _a.id;
+        return __awaiter(void 0, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, context.prisma.user.findOne({
+                            where: {
+                                id: Number(id)
+                            }
+                        })];
+                    case 1:
+                        user = _b.sent();
+                        console.log('is mod or admin', user.role === 'admin' || user.role === 'mod');
+                        return [2 /*return*/, user.role === 'admin' || user.role === 'mod'];
+                }
+            });
+        });
+    }),
+    isAdmin: graphql_shield_1.rule()(function (parent, _a, context) {
+        var id = _a.id;
+        return __awaiter(void 0, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, context.prisma.user.findOne({
+                            where: {
+                                id: Number(id)
+                            }
+                        })
+                        // console.log('is admin', user.role === 'admin')
+                    ];
+                    case 1:
+                        user = _b.sent();
+                        // console.log('is admin', user.role === 'admin')
                         return [2 /*return*/, user.role === 'admin'];
                 }
             });
@@ -149,20 +190,23 @@ var rules = {
 // Being admin or mod takes precedence over being banned or not
 exports.permissions = graphql_shield_1.shield({
     Query: {
-        me: rules.isAuthenticatedUser
+        me: rules.isAuthenticatedUser,
+        users: rules.fromMod
     },
     Mutation: {
         // User Permissions
-        updateRole: rules.isAdmin,
-        updateBan: rules.isMod,
+        updateRole: rules.fromAdmin,
+        updateBan: graphql_shield_1.and(rules.fromMod, graphql_shield_1.not(rules.isMod), graphql_shield_1.not(rules.isAdmin)),
         // Servers Permissions
         createServer: rules.isAuthenticatedUser,
-        updateTitle: graphql_shield_1.or(rules.isMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
-        addTag: graphql_shield_1.or(rules.isMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
-        removeTag: graphql_shield_1.or(rules.isMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
-        updateCover: graphql_shield_1.or(rules.isMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
-        updateIp: graphql_shield_1.or(rules.isMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
-        updateRemoteInfo: graphql_shield_1.or(rules.isMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
-        deleteServer: graphql_shield_1.or(rules.isMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner))
+        updateTitle: graphql_shield_1.or(rules.fromMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
+        addTag: graphql_shield_1.or(rules.fromMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
+        removeTag: graphql_shield_1.or(rules.fromMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
+        updateCover: graphql_shield_1.or(rules.fromMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
+        updateIp: graphql_shield_1.or(rules.fromMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
+        updateRemoteInfo: graphql_shield_1.or(rules.fromMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
+        deleteServer: graphql_shield_1.or(rules.fromMod, graphql_shield_1.and(rules.isAuthenticatedUser, rules.isServerOwner)),
+        vote: rules.isAuthenticatedUser,
+        resetVotes: rules.fromAdmin
     }
 });

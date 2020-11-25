@@ -3,9 +3,10 @@
 
 
 type AuthPayload {
-  token: String!
   user: User!
 }
+
+scalar DateTime
 
 type Mutation {
   addTag(id: Int!, tags: [String!]!): ServerPayload!
@@ -14,19 +15,23 @@ type Mutation {
   oAuthLogin(code: String!): AuthPayload!
   publishServer(id: Int!): ServerPayload!
   removeTag(id: Int!, tag: String!): ServerPayload!
+  resetVotes(id: Int!): ServerPayload
+  testResponse: String!
   updateBan(banned: Boolean!, id: Int!): UserPayload!
+  updateContent(content: String!, id: Int!): ServerPayload!
   updateCover(cover: String!, id: Int!): ServerPayload!
   updateIp(id: Int!, ip: String!): ServerPayload!
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!
   updateRole(id: Int!, role: String!): UserPayload!
   updateTitle(id: Int!, title: String!): ServerPayload!
+  vote(id: Int!): ServerPayload
 }
 
 type Query {
-  feed: [Server!]!
-  filterServers(searchString: String): [Server!]!
+  feed(date: String! = "2020-11-25T15:13:15.331Z", page: Int! = 0): [Server!]!
   me: User
-  server(id: Int): Server
+  searchServers(date: String! = "2020-11-25T15:13:15.331Z", page: Int! = 0, searchString: String): [Server!]!
+  server(date: String! = "2020-11-25T15:13:15.331Z", id: Int): Server
   users: [User!]!
 }
 
@@ -40,10 +45,20 @@ type Server {
   tags(after: TagWhereUniqueInput, before: TagWhereUniqueInput, first: Int, last: Int): [Tag!]!
   title: String!
   version: Version!
+  voteCount: Int!
+  votes(after: VoteWhereUniqueInput, before: VoteWhereUniqueInput, first: Int, last: Int): [Vote!]!
 }
 
 type ServerPayload {
-  server: Server!
+  author: Int!
+  content: String!
+  cover: String!
+  id: Int!
+  published: Boolean!
+  slots: Int!
+  tags: Tag!
+  title: String!
+  version: Version!
 }
 
 input ServerWhereUniqueInput {
@@ -84,10 +99,12 @@ type Version {
 
 type Vote {
   author: User!
+  createdAt: DateTime!
   id: Int!
   server: Server!
 }
 
 input VoteWhereUniqueInput {
+  createdAt: DateTime
   id: Int
 }

@@ -41,6 +41,7 @@ exports.Vote = schema_1.objectType({
     name: 'Vote',
     definition: function (t) {
         t.model.id();
+        t.model.createdAt();
         t.model.author();
         t.model.server();
     }
@@ -48,7 +49,15 @@ exports.Vote = schema_1.objectType({
 exports.ServerPayload = schema_1.objectType({
     name: 'ServerPayload',
     definition: function (t) {
-        t.field('server', { type: 'Server' });
+        t.field('id', { type: 'Int' });
+        t.field('published', { type: 'Boolean' });
+        t.field('title', { type: 'String' });
+        t.field('content', { type: 'String' });
+        t.field('author', { type: 'Int' });
+        t.field('tags', { type: 'Tag' });
+        t.field('version', { type: 'Version' });
+        t.field('slots', { type: 'Int' });
+        t.field('cover', { type: 'String' });
     }
 });
 exports.Server = schema_1.objectType({
@@ -63,12 +72,13 @@ exports.Server = schema_1.objectType({
         t.model.version();
         t.model.slots();
         t.model.cover();
+        t.model.votes();
+        t.field('voteCount', { type: 'Int' });
     }
 });
 exports.AuthPayload = schema_1.objectType({
     name: 'AuthPayload',
     definition: function (t) {
-        t.string('token');
         t.field('user', { type: 'User' });
     }
 });
