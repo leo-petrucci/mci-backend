@@ -78,6 +78,7 @@ export const Server = objectType({
     t.model.cover()
     t.model.votes()
     t.field('voteCount', { type: 'Int' })
+    t.field('canVote', { type: 'Boolean' })
   },
 })
 
