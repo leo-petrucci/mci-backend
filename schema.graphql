@@ -24,14 +24,14 @@ type Mutation {
   updateRemoteInfo(id: Int!, ip: String!): ServerPayload!
   updateRole(id: Int!, role: String!): UserPayload!
   updateTitle(id: Int!, title: String!): ServerPayload!
-  vote(id: Int!): ServerPayload
+  vote(id: Int!): VoteCast
 }
 
 type Query {
-  feed(date: String! = "2020-12-05T21:52:34.420Z", page: Int! = 0): [Server!]!
+  feed(date: String! = "2020-12-05T23:38:12.793Z", page: Int! = 0): [Server!]!
   me: User
-  searchServers(date: String! = "2020-12-05T21:52:34.420Z", page: Int! = 0, searchString: String): [Server!]!
-  server(date: String! = "2020-12-05T21:52:34.420Z", id: Int): Server
+  searchServers(date: String! = "2020-12-05T23:38:12.793Z", page: Int! = 0, searchString: String): [Server!]!
+  server(date: String! = "2020-12-05T23:38:12.793Z", id: Int): Server
   users: [User!]!
 }
 
@@ -103,6 +103,10 @@ type Vote {
   createdAt: DateTime!
   id: Int!
   server: Server!
+}
+
+type VoteCast {
+  outcome: String!
 }
 
 input VoteWhereUniqueInput {

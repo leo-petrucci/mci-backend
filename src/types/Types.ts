@@ -49,6 +49,13 @@ export const Vote = objectType({
   },
 })
 
+export const VoteCast = objectType({
+  name: 'VoteCast',
+  definition(t) {
+    t.field('outcome', { type: 'String' })
+  },
+})
+
 export const ServerPayload = objectType({
   name: 'ServerPayload',
   definition(t) {
