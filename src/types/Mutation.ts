@@ -443,6 +443,7 @@ export const Mutation = mutationType({
             outcome: 'Your vote was added.',
           }
         } else {
+          ctx.res.status(401)
           return {
             outcome: 'You have already voted for this server this month.',
           }
