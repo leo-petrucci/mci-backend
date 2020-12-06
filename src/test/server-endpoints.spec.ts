@@ -194,10 +194,28 @@ describe('Server Endpoints', () => {
   })
   it("non logged in users can't vote", async () => {
     const res = await chai.request(app).post('/').send({
-      query: `mutation{ vote(id: 1) { title } }`,
+      query: `mutation{ vote(id: 1) { outcome } }`,
     })
     expect(res).to.have.status(401)
     expect(res.body.errors[0].message).to.be.a('string', 'Not Authorised!')
+  })
+  it('non-logged in users view server with canVote false', async () => {
+    const res = await chai.request(app).post('/').send({
+      query: `query { server (id: 1) { canVote } }`,
+    })
+    expect(res).to.have.status(200)
+    expect(res.body.data.server.canVote).to.be.false
+  })
+  it('logged in users can view server with canVote key', async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `query { server (id: 1) { canVote } }`,
+      })
+    expect(res).to.have.status(200)
+    expect(res.body.data.server.canVote).to.be.true
   })
   it('logged in users can vote', async () => {
     const res = await chai
@@ -205,9 +223,48 @@ describe('Server Endpoints', () => {
       .post('/')
       .set('Cookie', 'token=' + process.env.USER_TOKEN)
       .send({
-        query: `mutation{ vote(id: 1) { title } }`,
+        query: `mutation{ vote(id: 1) { outcome } }`,
       })
     expect(res).to.have.status(200)
+  })
+  it('canvote is false after voting', async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `query { server (id: 1) { canVote } }`,
+      })
+    expect(res).to.have.status(200)
+    expect(res.body.data.server.canVote).to.be.false
+  })
+  it("logged in users can't vote twice for the same server", async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `mutation{ vote(id: 1) { outcome } }`,
+      })
+    expect(res).to.have.status(401)
+  })
+  it("logged in users can't vote twice for the same server in a short amount of time", async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `mutation{ vote(id: 2) { outcome } }`,
+      })
+    const res2 = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `mutation{ vote(id: 2) { outcome } }`,
+      })
+    expect(res).to.have.status(200)
+    expect(res2).to.have.status(401)
   })
   it('admins can reset votes', async () => {
     const res = await chai
@@ -221,6 +278,18 @@ describe('Server Endpoints', () => {
           }
         }
         `,
+      })
+    const res2 = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.ADMIN_TOKEN)
+      .send({
+        query: `mutation {
+            resetVotes(id: 2) {
+              title
+            }
+          }
+          `,
       })
     expect(res).to.have.status(200)
   })

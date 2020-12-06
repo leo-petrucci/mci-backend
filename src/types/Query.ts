@@ -35,7 +35,7 @@ export const Query = queryType({
 
         let userId
         try {
-          userId = getUserId(ctx)
+          userId = getUserId(ctx, true)
         } catch (error) {}
 
         if (userId) {
@@ -51,6 +51,7 @@ export const Query = queryType({
           GROUP BY s.id ORDER BY "voteCount" DESC
           OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;`
         } else {
+          ctx.res.status(200)
           return ctx.prisma
             .$queryRaw`SELECT s.id, s.title, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount", 
@@ -101,8 +102,10 @@ export const Query = queryType({
 
         let userId
         try {
-          userId = getUserId(ctx)
-        } catch (error) {}
+          userId = getUserId(ctx, true)
+        } catch (error) {
+          ctx.res.status(200)
+        }
 
         let servers
 
