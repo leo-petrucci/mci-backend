@@ -36,10 +36,8 @@ export const Query = queryType({
         let userId
         try {
           userId = getUserId(ctx)
-        } catch (error) {
-          return error
-        }
-        console.log('user id is', userId)
+        } catch (error) {}
+
         if (userId) {
           return ctx.prisma
             .$queryRaw`SELECT s.id, s.title, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
@@ -100,9 +98,28 @@ export const Query = queryType({
       },
       resolve: async (parent, { id, date }, ctx) => {
         const [d, f] = getDates(date)
-        const servers = await ctx.prisma
-          .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
-          THEN 1 ELSE 0 END ) AS "voteCount" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE s.id = ${id} GROUP BY s.id LIMIT 1;`
+
+        let userId
+        try {
+          userId = getUserId(ctx)
+        } catch (error) {}
+
+        let servers
+
+        if (userId) {
+          servers = await ctx.prisma
+            .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
+          THEN 1 ELSE 0 END ) AS "voteCount",
+          sum(CASE WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f} AND v."authorId" = ${userId} 
+            THEN 0 
+            ELSE 1
+            END) as "canVote" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE s.id = ${id} GROUP BY s.id LIMIT 1;`
+        } else {
+          servers = await ctx.prisma
+            .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
+          THEN 1 ELSE 0 END ) AS "voteCount", 
+          0 as "canVote" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE s.id = ${id} GROUP BY s.id LIMIT 1;`
+        }
         return servers[0]
       },
     })

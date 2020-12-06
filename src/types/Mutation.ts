@@ -425,6 +425,8 @@ export const Mutation = mutationType({
         const userId = getUserId(ctx)
         const [d, f] = getDates(new Date().toISOString())
 
+        await ctx.prisma.$executeRaw`SELECT pg_advisory_lock(1);`
+
         const vote = await ctx.prisma
           .$executeRaw`INSERT INTO "Vote" ("authorId", "serverId")
           SELECT ${userId}, ${id}
@@ -432,10 +434,14 @@ export const Mutation = mutationType({
               SELECT id
               FROM "Vote" as v
               WHERE
+                  v."serverId" = ${id} AND
                   v."createdAt" >= ${d} AND
                   v."createdAt" < ${f} AND
                   v."authorId" = ${userId});
           `
+
+        await ctx.prisma.$executeRaw`SELECT pg_advisory_unlock(1);`
+
         console.log('vote is', vote)
 
         if (vote) {
