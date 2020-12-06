@@ -16,6 +16,7 @@ import {
   getTagsQuery,
   getMciToken,
   getMciProfile,
+  getDates,
 } from '../utils'
 let cookie = require('cookie')
 
@@ -417,20 +418,42 @@ export const Mutation = mutationType({
     })
 
     t.field('vote', {
-      type: 'ServerPayload',
+      type: 'VoteCast',
       nullable: true,
       args: { id: intArg({ nullable: false }) },
       resolve: async (parent, { id }, ctx): Promise<any> => {
         const userId = getUserId(ctx)
+        const [d, f] = getDates(new Date().toISOString())
 
-        const vote = ctx.prisma
-          .$executeRaw`INSERT INTO "Vote" ("authorId", "serverId") VALUES (${userId}, ${id});`
+        await ctx.prisma.$executeRaw`SELECT pg_advisory_lock(1);`
 
-        return ctx.prisma.server.findOne({
-          where: {
-            id: Number(id),
-          },
-        })
+        const vote = await ctx.prisma
+          .$executeRaw`INSERT INTO "Vote" ("authorId", "serverId")
+          SELECT ${userId}, ${id}
+          WHERE NOT EXISTS (
+              SELECT id
+              FROM "Vote" as v
+              WHERE
+                  v."serverId" = ${id} AND
+                  v."createdAt" >= ${d} AND
+                  v."createdAt" < ${f} AND
+                  v."authorId" = ${userId});
+          `
+
+        await ctx.prisma.$executeRaw`SELECT pg_advisory_unlock(1);`
+
+        console.log('vote is', vote)
+
+        if (vote) {
+          return {
+            outcome: 'Your vote was added.',
+          }
+        } else {
+          ctx.res.status(401)
+          return {
+            outcome: 'You have already voted for this server this month.',
+          }
+        }
       },
     })
 

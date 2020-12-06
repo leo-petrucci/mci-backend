@@ -11,7 +11,7 @@ interface Token {
   userId: string
 }
 
-export function getUserId(context: Context) {
+export function getUserId(context: Context, bypassError: boolean = false) {
   if (context.req.header('Cookie')) {
     const Authorization = cookie.parse(context.req.header('Cookie'))
     const { token } = Authorization
@@ -25,7 +25,7 @@ export function getUserId(context: Context) {
       throw new Error('Could not authenticate user.')
     }
   } else {
-    context.res.status(401)
+    if (!bypassError) context.res.status(401)
   }
 }
 
