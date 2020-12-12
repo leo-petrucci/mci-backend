@@ -28,10 +28,10 @@ type Mutation {
 }
 
 type Query {
-  feed(date: String! = "2020-12-06T18:44:19.935Z", page: Int! = 0): [Server!]!
+  feed(date: String! = "2020-12-12T21:38:35.702Z", page: Int! = 0): [Server!]!
   me: User
-  searchServers(date: String! = "2020-12-06T18:44:19.935Z", page: Int! = 0, searchString: String): [Server!]!
-  server(date: String! = "2020-12-06T18:44:19.935Z", id: Int): Server
+  searchServers(date: String! = "2020-12-12T21:38:35.702Z", page: Int! = 0, searchString: String): [Server!]!
+  server(date: String! = "2020-12-12T21:38:35.702Z", id: Int): Server
   users: [User!]!
 }
 

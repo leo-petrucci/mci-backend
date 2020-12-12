@@ -45,20 +45,24 @@ export const Query = queryType({
           sum(CASE WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f} AND v."authorId" = ${userId} 
             THEN 0 
             ELSE 1
-            END) as "canVote"
+            END) as "canVote",
+          json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
           FROM "Server" AS s 
-          LEFT JOIN "Vote" AS v ON (s.id = "serverId")
-          GROUP BY s.id ORDER BY "voteCount" DESC
+            LEFT JOIN "User" u ON (s."authorId" = u.id) 
+            LEFT JOIN "Vote" AS v ON (s.id = "serverId")
+          GROUP BY s.id, u.id ORDER BY "voteCount" DESC
           OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;`
         } else {
           ctx.res.status(200)
           return ctx.prisma
             .$queryRaw`SELECT s.id, s.title, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount", 
-          0 as "canVote"
+          0 as "canVote",
+          json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
           FROM "Server" AS s 
-          LEFT JOIN "Vote" AS v ON (s.id = "serverId")
-          GROUP BY s.id ORDER BY "voteCount" DESC
+            LEFT JOIN "User" u ON (s."authorId" = u.id) 
+            LEFT JOIN "Vote" AS v ON (s.id = "serverId")
+          GROUP BY s.id, u.id ORDER BY "voteCount" DESC
           OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;`
         }
       },
@@ -80,12 +84,16 @@ export const Query = queryType({
           (SELECT v.id FROM "Vote" AS v WHERE v."createdAt" >= '2020-09-01' AND v."createdAt" <= '2020-10-01' AND v."authorId" = 6667)
             THEN 1 
             ELSE 0 
-            END as "hasVoted"
-        FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE title LIKE ${
+            END as "hasVoted",
+          json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
+        FROM "Server" AS s 
+          LEFT JOIN "User" u ON (s."authorId" = u.id) 
+          LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
+        WHERE title LIKE ${'%' + searchString + '%'} OR content LIKE ${
           '%' + searchString + '%'
-        } OR content LIKE ${
-          '%' + searchString + '%'
-        } GROUP BY s.id ORDER BY "voteCount" DESC
+        } 
+        GROUP BY s.id, u.id 
+        ORDER BY "voteCount" DESC
         OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;`
       },
     })
@@ -116,12 +124,26 @@ export const Query = queryType({
           sum(CASE WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f} AND v."authorId" = ${userId} 
             THEN 0 
             ELSE 1
-            END) as "canVote" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE s.id = ${id} GROUP BY s.id LIMIT 1;`
+            END) as "canVote", 
+            json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
+            FROM "Server" AS s 
+              LEFT JOIN "User" u ON (s."authorId" = u.id) 
+              LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
+            WHERE s.id = ${id} 
+            GROUP BY s.id, u.id 
+            LIMIT 1;`
         } else {
           servers = await ctx.prisma
             .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount", 
-          0 as "canVote" FROM "Server" AS s LEFT JOIN "Vote" AS v ON (s.id = "serverId") WHERE s.id = ${id} GROUP BY s.id LIMIT 1;`
+          0 as "canVote", 
+          json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
+          FROM "Server" AS s 
+            LEFT JOIN "User" u ON (s."authorId" = u.id) 
+            LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
+          WHERE s.id = ${id} 
+          GROUP BY s.id, u.id 
+          LIMIT 1;`
         }
         return servers[0]
       },
