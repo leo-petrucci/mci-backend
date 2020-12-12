@@ -192,6 +192,49 @@ describe('Server Endpoints', () => {
       'You need to specify at least one tag to add.',
     )
   })
+
+  it('non logged in users can view server authors', async () => {
+    const res = await chai.request(app).post('/').send({
+      query: `query{ server(id: 1) { title, author { username } } }`,
+    })
+    expect(res).to.have.status(200)
+    expect(res.body.data.server.author.username).to.be.a('string', 'Guru')
+  })
+
+  it('logged in users can view server authors', async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `query{ server(id: 1) { title, author { username } } }`,
+      })
+    expect(res).to.have.status(200)
+    expect(res.body.data.server.author.username).to.be.a('string', 'Guru')
+  })
+
+  it('non logged in users can view server authors from feed', async () => {
+    const res = await chai.request(app).post('/').send({
+      query: `query{ feed { title, author { username } } }`,
+    })
+    expect(res).to.have.status(200)
+    expect(res.body.data.feed[0].author.username).to.be.a('string', 'Guru')
+  })
+
+  it('logged in users can view server authors from feed', async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `query{ feed { title, author { username } } }`,
+      })
+    expect(res).to.have.status(200)
+    expect(res.body.data.feed[0].author.username).to.be.a('string', 'Guru')
+  })
+
+  // VOTE TESTS
+
   it("non logged in users can't vote", async () => {
     const res = await chai.request(app).post('/').send({
       query: `mutation{ vote(id: 1) { outcome } }`,
