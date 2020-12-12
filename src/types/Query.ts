@@ -46,10 +46,13 @@ export const Query = queryType({
             THEN 0 
             ELSE 1
             END) as "canVote",
+            json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
           json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
           FROM "Server" AS s 
             LEFT JOIN "User" u ON (s."authorId" = u.id) 
             LEFT JOIN "Vote" AS v ON (s.id = "serverId")
+            LEFT JOIN "_ServerToTag" st ON (s.id = st."A") 
+            LEFT JOIN "Tag" t ON (st."B" = t.id)
           GROUP BY s.id, u.id ORDER BY "voteCount" DESC
           OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;`
         } else {
@@ -58,10 +61,13 @@ export const Query = queryType({
             .$queryRaw`SELECT s.id, s.title, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount", 
           0 as "canVote",
+          json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
           json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
           FROM "Server" AS s 
             LEFT JOIN "User" u ON (s."authorId" = u.id) 
             LEFT JOIN "Vote" AS v ON (s.id = "serverId")
+            LEFT JOIN "_ServerToTag" st ON (s.id = st."A") 
+            LEFT JOIN "Tag" t ON (st."B" = t.id)
           GROUP BY s.id, u.id ORDER BY "voteCount" DESC
           OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;`
         }
@@ -85,10 +91,13 @@ export const Query = queryType({
             THEN 1 
             ELSE 0 
             END as "hasVoted",
+            json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
           json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
         FROM "Server" AS s 
           LEFT JOIN "User" u ON (s."authorId" = u.id) 
           LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
+          LEFT JOIN "_ServerToTag" st ON (s.id = st."A") 
+          LEFT JOIN "Tag" t ON (st."B" = t.id)
         WHERE title LIKE ${'%' + searchString + '%'} OR content LIKE ${
           '%' + searchString + '%'
         } 
@@ -125,10 +134,13 @@ export const Query = queryType({
             THEN 0 
             ELSE 1
             END) as "canVote", 
+            json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
             json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
             FROM "Server" AS s 
               LEFT JOIN "User" u ON (s."authorId" = u.id) 
               LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
+              LEFT JOIN "_ServerToTag" st ON (s.id = st."A") 
+              LEFT JOIN "Tag" t ON (st."B" = t.id)
             WHERE s.id = ${id} 
             GROUP BY s.id, u.id 
             LIMIT 1;`
@@ -137,10 +149,13 @@ export const Query = queryType({
             .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount", 
           0 as "canVote", 
+          json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
           json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
           FROM "Server" AS s 
             LEFT JOIN "User" u ON (s."authorId" = u.id) 
             LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
+            LEFT JOIN "_ServerToTag" st ON (s.id = st."A") 
+            LEFT JOIN "Tag" t ON (st."B" = t.id)
           WHERE s.id = ${id} 
           GROUP BY s.id, u.id 
           LIMIT 1;`
