@@ -61,6 +61,7 @@ export const ServerPayload = objectType({
   definition(t) {
     t.field('id', { type: 'Int' })
     t.field('published', { type: 'Boolean' })
+    t.field('createdAt', { type: 'String' })
     t.field('title', { type: 'String' })
     t.field('content', { type: 'String' })
     t.field('author', { type: 'Int' })
@@ -76,6 +77,7 @@ export const Server = objectType({
   definition(t) {
     t.model.id()
     t.model.published()
+    t.model.createdAt()
     t.model.title()
     t.model.content()
     t.model.author()
