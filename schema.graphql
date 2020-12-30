@@ -28,10 +28,10 @@ type Mutation {
 }
 
 type Query {
-  feed(date: String! = "2020-12-30T15:57:44.451Z", page: Int! = 0): [Server!]!
+  feed(date: String! = "2020-12-30T23:29:33.899Z", page: Int! = 0): [Server!]!
   me: User
-  searchServers(date: String! = "2020-12-30T15:57:44.451Z", page: Int! = 0, searchString: String): [Server!]!
-  server(date: String! = "2020-12-30T15:57:44.451Z", id: Int): Server
+  searchServers(date: String! = "2020-12-30T23:29:33.899Z", page: Int! = 0, searchString: String): [Server!]!
+  server(date: String! = "2020-12-30T23:29:33.899Z", id: Int): Server
   users: [User!]!
 }
 
@@ -40,6 +40,7 @@ type Server {
   canVote: Boolean!
   content: String
   cover: String
+  createdAt: DateTime!
   id: Int!
   published: Boolean!
   slots: Int!
@@ -54,6 +55,7 @@ type ServerPayload {
   author: Int!
   content: String!
   cover: String!
+  createdAt: String!
   id: Int!
   published: Boolean!
   slots: Int!
