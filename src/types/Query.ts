@@ -40,7 +40,7 @@ export const Query = queryType({
 
         if (userId) {
           return ctx.prisma
-            .$queryRaw`SELECT s.id, s.title, s.cover, s.slots, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
+            .$queryRaw`SELECT s.id, s.title, s.createdAt, s.cover, s.slots, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount",
           sum(CASE WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f} AND v."authorId" = ${userId} 
             THEN 0 
@@ -58,7 +58,7 @@ export const Query = queryType({
         } else {
           ctx.res.status(200)
           return ctx.prisma
-            .$queryRaw`SELECT s.id, s.title, s.cover, s.slots, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
+            .$queryRaw`SELECT s.id, s.title, s.createdAt, s.cover, s.slots, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount", 
           0 as "canVote",
           json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
@@ -85,7 +85,7 @@ export const Query = queryType({
         const [d, f] = getDates(date)
         const pageLimit = 10
         return await ctx.prisma
-          .$queryRaw`SELECT s.id, s.title, s.cover, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
+          .$queryRaw`SELECT s.id, s.title, s.cover, s.createdAt, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount", CASE WHEN EXISTS 
           (SELECT v.id FROM "Vote" AS v WHERE v."createdAt" >= '2020-09-01' AND v."createdAt" <= '2020-10-01' AND v."authorId" = 6667)
             THEN 1 
@@ -128,7 +128,7 @@ export const Query = queryType({
 
         if (userId) {
           servers = await ctx.prisma
-            .$queryRaw`SELECT s.id, s.title, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
+            .$queryRaw`SELECT s.id, s.title, s.createdAt, s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
           THEN 1 ELSE 0 END ) AS "voteCount",
           sum(CASE WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f} AND v."authorId" = ${userId} 
             THEN 0 
