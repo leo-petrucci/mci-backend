@@ -39,37 +39,161 @@ export const Query = queryType({
         } catch (error) {}
 
         if (userId) {
-          return ctx.prisma
-            .$queryRaw`SELECT s.id, s.title, s."createdAt", s.cover, s.slots, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
-          THEN 1 ELSE 0 END ) AS "voteCount",
-          sum(CASE WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f} AND v."authorId" = ${userId} 
-            THEN 0 
-            ELSE 1
-            END) as "canVote",
-            json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
-          json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
-          FROM "Server" AS s 
-            LEFT JOIN "User" u ON (s."authorId" = u.id) 
-            LEFT JOIN "Vote" AS v ON (s.id = "serverId")
-            LEFT JOIN "_ServerToTag" st ON (s.id = st."A") 
-            LEFT JOIN "Tag" t ON (st."B" = t.id)
-          GROUP BY s.id, u.id ORDER BY "voteCount" DESC
-          OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;`
+          return ctx.prisma.$queryRaw`
+              SELECT 
+                  s.id
+              ,   s.title
+              ,   s.content
+              ,   s.cover
+              ,   s.slots
+              ,   s."createdAt"
+              ,   a."authorObj"
+              ,   COALESCE(v."VOTES", 0) AS "voteCount" 
+              ,   CASE WHEN uv."serverId" IS NULL THEN 1 ELSE 0 END AS
+              "canVote"
+              ,   tag."tagsArray"
+              FROM "Server" AS s
+                  -- Get tags
+                  INNER JOIN
+                  (
+                      SELECT
+                          st."A"
+                      ,   json_agg(
+                                      json_build_object(
+                                          'id', 
+                                          t.id, 
+                                          'tagName', 
+                                          t."tagName"
+                                      )
+                                  ) as "tagsArray"
+                      FROM
+                          "_ServerToTag" AS st
+                      INNER JOIN
+                          "Tag" AS t
+                      ON
+                          t.id = st."B"
+                      GROUP BY
+                          st."A"
+                  ) AS tag
+                  ON
+                      tag."A" = s.id
+                  -- Build the author objects
+                  INNER JOIN
+                  (
+                      SELECT
+                          id
+                      ,   json_build_object(
+                              'username', u.username,
+                              'id', u.id,
+                              'photoUrl', u."photoUrl"
+                          ) AS "authorObj"
+                      FROM
+                          "User" as u
+                  ) AS a
+                  ON
+                      a.id = s."authorId"
+                  LEFT JOIN 
+                  (
+                      SELECT 
+                          "serverId"
+                      ,   COUNT(*) AS "VOTES" 
+                      FROM 
+                          "Vote" as v 
+                      WHERE 
+                          v."createdAt" >= ${d} AND 
+                          v."createdAt" < ${f} 
+                      GROUP BY "serverId"
+                  ) as v 
+                  ON 
+                      s.id = v."serverId"
+                  -- Get the current user's votes in this period
+                  LEFT JOIN
+                  (
+                      SELECT DISTINCT
+                          "serverId"
+                      FROM
+                          "Vote"
+                      WHERE
+                          "createdAt" >= ${d}
+                      AND
+                          "createdAt" <  ${f}
+                      AND
+                          "authorId" = ${userId}
+                  ) AS uv
+                  ON
+                      v."serverId" = s.id
+                OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;
+            `
         } else {
           ctx.res.status(200)
-          return ctx.prisma
-            .$queryRaw`SELECT s.id, s.title, s."createdAt", s.cover, s.slots, s.content, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
-          THEN 1 ELSE 0 END ) AS "voteCount", 
-          0 as "canVote",
-          json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
-          json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
-          FROM "Server" AS s 
-            LEFT JOIN "User" u ON (s."authorId" = u.id) 
-            LEFT JOIN "Vote" AS v ON (s.id = "serverId")
-            LEFT JOIN "_ServerToTag" st ON (s.id = st."A") 
-            LEFT JOIN "Tag" t ON (st."B" = t.id)
-          GROUP BY s.id, u.id ORDER BY "voteCount" DESC
-          OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;`
+          return ctx.prisma.$queryRaw`
+              SELECT 
+                  s.id
+              ,   s.title
+              ,   s.content
+              ,   s.cover
+              ,   s.slots
+              ,   s."createdAt"
+              ,   a."authorObj"
+              ,   COALESCE(v."VOTES", 0) AS "voteCount" 
+              ,   0 AS "canVote"
+              ,   tag."tagsArray"
+              FROM "Server" AS s
+                  -- Get tags
+                  INNER JOIN
+                  (
+                      SELECT
+                          st."A"
+                      ,   json_agg(
+                                      json_build_object(
+                                          'id', 
+                                          t.id, 
+                                          'tagName', 
+                                          t."tagName"
+                                      )
+                                  ) as "tagsArray"
+                      FROM
+                          "_ServerToTag" AS st
+                      INNER JOIN
+                          "Tag" AS t
+                      ON
+                          t.id = st."B"
+                      GROUP BY
+                          st."A"
+                  ) AS tag
+                  ON
+                      tag."A" = s.id
+                  -- Build the author objects
+                  INNER JOIN
+                  (
+                      SELECT
+                          id
+                      ,   json_build_object(
+                              'username', u.username,
+                              'id', u.id,
+                              'photoUrl', u."photoUrl"
+                          ) AS "authorObj"
+                      FROM
+                          "User" as u
+                  ) AS a
+                  ON
+                      a.id = s."authorId"
+                  LEFT JOIN 
+                  (
+                      SELECT 
+                          "serverId"
+                      ,   COUNT(*) AS "VOTES" 
+                      FROM 
+                          "Vote" as v 
+                      WHERE 
+                          v."createdAt" >= ${d} AND 
+                          v."createdAt" < ${f} 
+                      GROUP BY "serverId"
+                  ) as v 
+                  ON 
+                      s.id = v."serverId"
+                OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;
+            `
         }
       },
     })
@@ -127,37 +251,158 @@ export const Query = queryType({
         let servers
 
         if (userId) {
-          servers = await ctx.prisma
-            .$queryRaw`SELECT s.id, s.title, s."createdAt", s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
-          THEN 1 ELSE 0 END ) AS "voteCount",
-          sum(CASE WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f} AND v."authorId" = ${userId} 
-            THEN 0 
-            ELSE 1
-            END) as "canVote", 
-            json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
-            json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
-            FROM "Server" AS s 
-              LEFT JOIN "User" u ON (s."authorId" = u.id) 
-              LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
-              LEFT JOIN "_ServerToTag" st ON (s.id = st."A") 
-              LEFT JOIN "Tag" t ON (st."B" = t.id)
-            WHERE s.id = ${id} 
-            GROUP BY s.id, u.id 
-            LIMIT 1;`
+          servers = await ctx.prisma.$queryRaw`
+            SELECT 
+                s.id
+            ,   s.title
+            ,   s.content
+            ,   s.cover
+            ,   s.slots
+            ,   s."createdAt"
+            ,   a."authorObj"
+            ,   COALESCE(v."VOTES", 0) AS "voteCount" 
+            ,   CASE WHEN uv."serverId" IS NULL THEN 1 ELSE 0 END AS
+            "canVote"
+            ,   tag."tagsArray"
+            FROM "Server" AS s
+                -- Get tags
+                INNER JOIN
+                (
+                    SELECT
+                        st."A"
+                    ,   json_agg(
+                                    json_build_object(
+                                        'id', 
+                                        t.id, 
+                                        'tagName', 
+                                        t."tagName"
+                                    )
+                                ) as "tagsArray"
+                    FROM
+                        "_ServerToTag" AS st
+                    INNER JOIN
+                        "Tag" AS t
+                    ON
+                        t.id = st."B"
+                    GROUP BY
+                        st."A"
+                ) AS tag
+                ON
+                    tag."A" = s.id
+                -- Build the author objects
+                INNER JOIN
+                (
+                    SELECT
+                        id
+                    ,   json_build_object(
+                            'username', u.username,
+                            'id', u.id,
+                            'photoUrl', u."photoUrl"
+                        ) AS "authorObj"
+                    FROM
+                        "User" as u
+                ) AS a
+                ON
+                    a.id = s."authorId"
+                LEFT JOIN 
+                (
+                    SELECT 
+                        "serverId"
+                    ,   COUNT(*) AS "VOTES" 
+                    FROM 
+                        "Vote" as v 
+                    WHERE 
+                        v."createdAt" >= ${d} AND 
+                        v."createdAt" < ${f} 
+                    GROUP BY "serverId"
+                ) as v 
+                ON 
+                    s.id = v."serverId"
+                -- Get the current user's votes in this period
+                LEFT JOIN
+                (
+                    SELECT DISTINCT
+                        "serverId"
+                    FROM
+                        "Vote"
+                    WHERE
+                        "createdAt" >= ${d}
+                    AND
+                        "createdAt" <  ${f}
+                    AND
+                        "authorId" = ${userId}
+                ) AS uv
+                ON
+                    v."serverId" = s.id
+                LIMIT 1;
+                ;`
         } else {
-          servers = await ctx.prisma
-            .$queryRaw`SELECT s.id, s.title, s."createdAt", s.content, s.slots, s.cover, sum(case WHEN v."createdAt" >= ${d} AND v."createdAt" < ${f}
-          THEN 1 ELSE 0 END ) AS "voteCount", 
-          0 as "canVote", 
-          json_agg(json_build_object('id', t.id, 'tagName', t."tagName")) as "tags",
-          json_build_object('username', u.username, 'id', u.id, 'photoUrl', u."photoUrl") AS "author" 
-          FROM "Server" AS s 
-            LEFT JOIN "User" u ON (s."authorId" = u.id) 
-            LEFT JOIN "Vote" AS v ON (s.id = "serverId") 
-            LEFT JOIN "_ServerToTag" st ON (s.id = st."A") 
-            LEFT JOIN "Tag" t ON (st."B" = t.id)
-          WHERE s.id = ${id} 
-          GROUP BY s.id, u.id 
+          servers = await ctx.prisma.$queryRaw`
+            SELECT 
+                s.id
+            ,   s.title
+            ,   s.content
+            ,   s.cover
+            ,   s.slots
+            ,   s."createdAt"
+            ,   a."authorObj"
+            ,   COALESCE(v."VOTES", 0) AS "voteCount" 
+            ,   false AS "canVote"
+            ,   tag."tagsArray"
+            FROM "Server" AS s
+                -- Get tags
+                INNER JOIN
+                (
+                    SELECT
+                        st."A"
+                    ,   json_agg(
+                                    json_build_object(
+                                        'id', 
+                                        t.id, 
+                                        'tagName', 
+                                        t."tagName"
+                                    )
+                                ) as "tagsArray"
+                    FROM
+                        "_ServerToTag" AS st
+                    INNER JOIN
+                        "Tag" AS t
+                    ON
+                        t.id = st."B"
+                    GROUP BY
+                        st."A"
+                ) AS tag
+                ON
+                    tag."A" = s.id
+                -- Build the author objects
+                INNER JOIN
+                (
+                    SELECT
+                        id
+                    ,   json_build_object(
+                            'username', u.username,
+                            'id', u.id,
+                            'photoUrl', u."photoUrl"
+                        ) AS "authorObj"
+                    FROM
+                        "User" as u
+                ) AS a
+                ON
+                    a.id = s."authorId"
+                LEFT JOIN 
+                (
+                    SELECT 
+                        "serverId"
+                    ,   COUNT(*) AS "VOTES" 
+                    FROM 
+                        "Vote" as v 
+                    WHERE 
+                        v."createdAt" >= ${d} AND 
+                        v."createdAt" < ${f} 
+                    GROUP BY "serverId"
+                ) as v 
+                ON 
+                    s.id = v."serverId"
           LIMIT 1;`
         }
         return servers[0]
