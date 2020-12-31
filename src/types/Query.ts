@@ -334,6 +334,8 @@ export const Query = queryType({
                 ) AS uv
                 ON
                     v."serverId" = s.id
+                WHERE 
+                    s.id = ${id}
                 LIMIT 1;
                 ;`
         } else {
@@ -403,7 +405,9 @@ export const Query = queryType({
                 ) as v 
                 ON 
                     s.id = v."serverId"
-          LIMIT 1;`
+                WHERE 
+                    s.id = ${id}
+                LIMIT 1;`
         }
         return servers[0]
       },
