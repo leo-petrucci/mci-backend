@@ -362,13 +362,13 @@ export const Query = queryType({
                     SELECT
                         st."A"
                     ,   json_agg(
-                                    json_build_object(
-                                        'id', 
-                                        t.id, 
-                                        'tagName', 
-                                        t."tagName"
-                                    )
-                                ) as "tagsArray"
+                            json_build_object(
+                                'id', 
+                                t.id, 
+                                'tagName', 
+                                t."tagName"
+                            )
+                        ) as "tagsArray"
                     FROM
                         "_ServerToTag" AS st
                     INNER JOIN
