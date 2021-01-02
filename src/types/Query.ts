@@ -40,7 +40,7 @@ export const Query = queryType({
 
         if (userId) {
           return ctx.prisma.$queryRaw`
-                SELECT 
+                SELECT DISTINCT
                     s.id
                 ,   s.title
                 ,   s.content
@@ -48,11 +48,11 @@ export const Query = queryType({
                 ,   s.cover
                 ,   s.slots
                 ,   s."createdAt"
-                ,   a."authorObj"
+                ,   a."authorObj"::jsonb
                 ,   COALESCE(v."VOTES", 0) AS "voteCount" 
                 ,   CASE WHEN uv."serverId" IS NULL THEN 1 ELSE 0 END AS
                 "canVote"
-                ,   tag."tagsArray"
+                ,   tag."tagsArray"::jsonb
                 FROM "Server" AS s
                     -- Get tags
                     INNER JOIN
@@ -95,9 +95,9 @@ export const Query = queryType({
                         a.id = s."authorId"
                     LEFT JOIN 
                     (
-                        SELECT 
+                        SELECT
                             "serverId"
-                        ,   COUNT(*) AS "VOTES" 
+                        ,   COUNT(DISTINCT v."authorId") AS "VOTES" 
                         FROM 
                             "Vote" as v 
                         WHERE 
@@ -136,10 +136,10 @@ export const Query = queryType({
                 ,   s.cover
                 ,   s.slots
                 ,   s."createdAt"
-                ,   a."authorObj"
+                ,   a."authorObj"::jsonb
                 ,   COALESCE(v."VOTES", 0) AS "voteCount" 
                 ,   0 AS "canVote"
-                ,   tag."tagsArray"
+                ,   tag."tagsArray"::jsonb
                 FROM "Server" AS s
                     -- Get tags
                     INNER JOIN
@@ -262,11 +262,11 @@ export const Query = queryType({
             ,   s.ip
             ,   s.slots
             ,   s."createdAt"
-            ,   a."authorObj"
+            ,   a."authorObj"::jsonb
             ,   COALESCE(v."VOTES", 0) AS "voteCount" 
             ,   CASE WHEN uv."serverId" IS NULL THEN 1 ELSE 0 END AS
             "canVote"
-            ,   tag."tagsArray"
+            ,   tag."tagsArray"::jsonb
             FROM "Server" AS s
                 -- Get tags
                 INNER JOIN
@@ -351,10 +351,10 @@ export const Query = queryType({
             ,   s.cover
             ,   s.slots
             ,   s."createdAt"
-            ,   a."authorObj"
+            ,   a."authorObj"::jsonb
             ,   COALESCE(v."VOTES", 0) AS "voteCount" 
             ,   false AS "canVote"
-            ,   tag."tagsArray"
+            ,   tag."tagsArray"::jsonb
             FROM "Server" AS s
                 -- Get tags
                 INNER JOIN
