@@ -28,10 +28,10 @@ type Mutation {
 }
 
 type Query {
-  feed(date: String! = "2021-01-01T23:54:59.816Z", page: Int! = 0): [Server!]!
+  feed(date: String! = "2021-01-02T18:35:14.778Z", page: Int! = 0): [Server!]!
   me: User
-  searchServers(date: String! = "2021-01-01T23:54:59.816Z", page: Int! = 0, searchString: String): [Server!]!
-  server(date: String! = "2021-01-01T23:54:59.816Z", id: Int): Server
+  searchServers(date: String! = "2021-01-02T18:35:14.778Z", page: Int! = 0, searchString: String): [Server!]!
+  server(date: String! = "2021-01-02T18:35:14.778Z", id: Int): Server
   users: [User!]!
 }
 
@@ -42,6 +42,7 @@ type Server {
   cover: String
   createdAt: DateTime!
   id: Int!
+  ip: String!
   published: Boolean!
   slots: Int!
   tags(after: TagWhereUniqueInput, before: TagWhereUniqueInput, first: Int, last: Int): [Tag!]!

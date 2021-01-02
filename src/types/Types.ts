@@ -79,6 +79,7 @@ export const Server = objectType({
     t.model.published()
     t.model.createdAt()
     t.model.title()
+    t.model.ip()
     t.model.content()
     t.model.author()
     t.model.tags()
