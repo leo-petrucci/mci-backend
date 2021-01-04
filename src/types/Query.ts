@@ -416,5 +416,47 @@ export const Query = queryType({
         return servers[0]
       },
     })
+
+    t.list.field('searchTags', {
+      type: 'Tag',
+      args: {
+        searchString: stringArg({ nullable: true }),
+      },
+      resolve: async (parent, { searchString }, ctx) => {
+        return await ctx.prisma.$queryRaw`
+                SELECT 
+                    t.id
+                ,   t."tagName"
+                ,   COALESCE(tag."TAGS", 0) AS popularity
+                FROM 
+                    "Tag" as t 
+                INNER JOIN
+                (
+                    SELECT
+                        st."B"
+                    ,   COUNT(*) AS "TAGS"    
+                    FROM
+                        "_ServerToTag" AS st
+                    INNER JOIN
+                        "Server" AS s
+                    ON
+                        s.id = st."A"
+                    GROUP BY
+                        st."B"
+                ) AS tag
+                ON
+                    tag."B" = t.id
+                WHERE 
+                    t."tagName" 
+                LIKE 
+                    ${'%' + searchString + '%'}
+                ORDER BY
+                    popularity DESC
+                LIMIT 
+                    10
+                ;
+            `
+      },
+    })
   },
 })

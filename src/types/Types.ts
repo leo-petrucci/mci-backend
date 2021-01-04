@@ -20,6 +20,7 @@ export const Tag = objectType({
     t.model.id()
     t.model.tagName()
     t.model.Servers()
+    t.field('popularity', { type: 'Int' })
   },
 })
 

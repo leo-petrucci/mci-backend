@@ -380,4 +380,28 @@ describe('Server Endpoints', () => {
       })
     expect(res).to.have.status(200)
   })
+
+  it('tag search query works', async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `query { searchTags (searchString: "") { id } }`,
+      })
+    expect(res).to.have.status(200)
+    expect(res.body.data.searchTags).to.be.an('array')
+  })
+
+  it('tag search query works with search string', async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .send({
+        query: `query { searchTags (searchString: "test") { id } }`,
+      })
+    expect(res).to.have.status(200)
+    expect(res.body.data.searchTags).to.be.an('array')
+  })
 })
