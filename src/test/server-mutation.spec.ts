@@ -48,4 +48,21 @@ describe('Server mutations', () => {
       })
     expect(res).to.have.status(401)
   })
+  it("user can't edit servers it doesn't own", async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('token', process.env.USER_TOKEN)
+      .send({
+        query: `mutation{
+          updateTitle(id: 1, title: "New title") {
+            server{
+              title
+            }
+          }
+        }`,
+      })
+    expect(res.body.errors).to.be.an('array')
+    expect(res.body.errors[0].message).to.be.a('string', 'Not Authorised!')
+  })
 })
