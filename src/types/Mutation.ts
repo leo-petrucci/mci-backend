@@ -331,7 +331,7 @@ export const Mutation = mutationType({
     })
 
     t.field('createServer', {
-      type: 'ServerPayload',
+      type: 'Server',
       args: {
         title: stringArg({ nullable: false }),
         content: stringArg(),
@@ -381,7 +381,7 @@ export const Mutation = mutationType({
             author: { connect: { id: Number(userId) } },
           },
         })
-        return { server }
+        return server
       },
     })
 
