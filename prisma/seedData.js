@@ -48,6 +48,16 @@ const serverData = [
 
 const userData = [
   {
+    id: 1,
+    email: 'test@creativiii.com',
+    username: 'Fakeaccount',
+    role: 'user',
+    photoUrl:
+      'https://www.minecraftitalia.net/uploads/monthly_2020_04/Gator-in-Glasses.jpg.732642487878aada8a4c9aac0b5654f6.jpg',
+    posts: 0,
+    banned: true,
+  },
+  {
     id: 6667,
     email: 'leonardo@creativiii.com',
     username: 'Guru',

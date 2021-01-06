@@ -9,6 +9,10 @@ const rules = {
         id: Number(userId),
       },
     })
+    if (user.banned) {
+      console.log('user is banned')
+      context.res.status(401)
+    }
     return Boolean(userId) && !user.banned
   }),
   isPostOwner: rule()(async (parent, { id }, context) => {
