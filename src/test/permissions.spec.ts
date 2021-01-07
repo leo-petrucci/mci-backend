@@ -79,7 +79,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation { updateRole(id: 9999, role: "admin") { user { role } } }`,
       })
@@ -90,7 +90,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation{
           updateBan(id: 9999, banned: true) {
@@ -107,7 +107,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation{
           updateBan(id: 9999, banned: false) {
@@ -124,7 +124,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation{
           updateBan(id: 65157, banned: true) {
@@ -141,7 +141,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation{
           updateBan(id: 6667, banned: true) {
@@ -158,7 +158,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.ADMIN_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation { resetVotes(id: 1") { title }`,
       })
@@ -168,13 +168,15 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
-        query: `mutation{
-          updateTitle(id: 1, title: "New title of a big ole server") {
-            title
+        query: `
+          mutation{
+            updateTitle(id: 1, title: "New title of a big ole server") {
+              title
+            }
           }
-        }`,
+        `,
       })
     expect(res).to.have.status(200)
     expect(res.body.data.updateTitle).to.exist

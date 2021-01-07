@@ -10,18 +10,6 @@ const prisma = new PrismaClient()
 const tableNames = ['User', 'Server', 'Vote', 'Tag', 'Version']
 
 const main = async () => {
-  // const test = await prisma.user.create({
-  //   data: {
-  //     id: userData[2].id,
-  //     email: userData[2].email,
-  //     username: userData[2].username,
-  //     role: userData[2].role,
-  //     photoUrl: userData[2].photoUrl,
-  //     posts: userData[2].posts,
-  //     banned: userData[2].banned,
-  //   },
-  // })
-
   for (const tableName of tableNames) {
     await prisma.$queryRaw(`DELETE FROM "${tableName}";`)
 

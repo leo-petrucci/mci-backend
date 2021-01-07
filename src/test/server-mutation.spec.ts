@@ -54,14 +54,33 @@ describe('Server mutations', () => {
       .post('/')
       .set('token', process.env.USER_TOKEN)
       .send({
-        query: `mutation{
-          updateTitle(id: 1, title: "New title") {
-            server{
+        query: `
+          mutation{
+            updateTitle(id: 2, title: "A title that's a little longer than before") {
               title
             }
           }
-        }`,
+        `,
       })
+    expect(res).to.have.status(401)
+    expect(res.body.errors).to.be.an('array')
+    expect(res.body.errors[0].message).to.be.a('string', 'Not Authorised!')
+  })
+  it("banned user can't edit servers it owns", async () => {
+    const res = await chai
+      .request(app)
+      .post('/')
+      .set('token', process.env.BANNED_TOKEN)
+      .send({
+        query: `
+          mutation{
+            updateTitle(id: 3, title: "A title that's a little longer than before") {
+              title
+            }
+          }
+        `,
+      })
+    expect(res).to.have.status(401)
     expect(res.body.errors).to.be.an('array')
     expect(res.body.errors[0].message).to.be.a('string', 'Not Authorised!')
   })

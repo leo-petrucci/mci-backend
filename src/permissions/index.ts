@@ -10,23 +10,12 @@ const rules = {
       },
     })
     if (user.banned) {
-      console.log('user is banned')
       context.res.status(401)
     }
     return Boolean(userId) && !user.banned
   }),
-  isPostOwner: rule()(async (parent, { id }, context) => {
-    const userId = getUserId(context)
-    const author = await context.prisma.post
-      .findOne({
-        where: {
-          id: Number(id),
-        },
-      })
-      .author()
-    return userId === author.id
-  }),
   isServerOwner: rule()(async (parent, { id }, context) => {
+    console.log(context.req.header['Cookie'])
     const userId = getUserId(context)
     const author = await context.prisma.server
       .findOne({
@@ -35,7 +24,10 @@ const rules = {
         },
       })
       .author()
-    console.log('is server owner', userId === author.id)
+
+    if (userId !== author.id) {
+      // context.res.status(401)
+    }
     return userId === author.id
   }),
   fromMod: rule()(async (parent, { id }, context) => {

@@ -24,7 +24,7 @@ const serverData = [
     cover: 'https://via.placeholder.com/350x150.jpg',
     slots: 1068,
     ip: 'eu.mineplex.com',
-    authorId: 6667,
+    authorId: 65157,
     versionId: 1,
     tags: { tagName: 'test 2' },
     version: { versionName: '1.8.x-1.16.x' },
@@ -39,7 +39,7 @@ const serverData = [
     cover: 'https://via.placeholder.com/350x150.jpg',
     slots: 1068,
     ip: 'eu.mineplex.com',
-    authorId: 6667,
+    authorId: 1,
     versionId: 1,
     tags: { tagName: 'third' },
     version: { versionName: '1.8.x-1.16.x' },
@@ -50,12 +50,22 @@ const userData = [
   {
     id: 1,
     email: 'test@creativiii.com',
-    username: 'Fakeaccount',
+    username: 'Bannedaccount',
     role: 'user',
     photoUrl:
       'https://www.minecraftitalia.net/uploads/monthly_2020_04/Gator-in-Glasses.jpg.732642487878aada8a4c9aac0b5654f6.jpg',
     posts: 0,
     banned: true,
+  },
+  {
+    id: 2,
+    email: 'another@creativiii.com',
+    username: 'Modaccount',
+    role: 'mod',
+    photoUrl:
+      'https://www.minecraftitalia.net/uploads/monthly_2020_04/Gator-in-Glasses.jpg.732642487878aada8a4c9aac0b5654f6.jpg',
+    posts: 0,
+    banned: false,
   },
   {
     id: 6667,
