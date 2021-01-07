@@ -26,7 +26,7 @@ const rules = {
       .author()
 
     if (userId !== author.id) {
-      // context.res.status(401)
+      // context.res.status(401status(401)
     }
     return userId === author.id
   }),
