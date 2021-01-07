@@ -24,10 +24,6 @@ const rules = {
         },
       })
       .author()
-
-    if (userId !== author.id) {
-      // context.res.status(401status(401)
-    }
     return userId === author.id
   }),
   fromMod: rule()(async (parent, { id }, context) => {
@@ -37,7 +33,6 @@ const rules = {
         id: Number(userId),
       },
     })
-    console.log('is mod or admin', user.role === 'admin' || user.role === 'mod')
     return user.role === 'admin' || user.role === 'mod'
   }),
   fromAdmin: rule()(async (parent, { id }, context) => {
@@ -47,7 +42,6 @@ const rules = {
         id: Number(userId),
       },
     })
-    // console.log('is admin', user.role === 'admin')
     return user.role === 'admin'
   }),
   isMod: rule()(async (parent, { id }, context) => {
@@ -56,7 +50,6 @@ const rules = {
         id: Number(id),
       },
     })
-    console.log('is mod or admin', user.role === 'admin' || user.role === 'mod')
     return user.role === 'admin' || user.role === 'mod'
   }),
   isAdmin: rule()(async (parent, { id }, context) => {
@@ -65,7 +58,6 @@ const rules = {
         id: Number(id),
       },
     })
-    // console.log('is admin', user.role === 'admin')
     return user.role === 'admin'
   }),
 }

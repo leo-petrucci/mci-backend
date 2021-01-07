@@ -4,12 +4,14 @@ const { versionData } = require('./seedData')
 const { tagData } = require('./seedData')
 const { voteData } = require('./seedData')
 const { userData, serverData } = require('./seedData')
+require('console.mute')
 
 const prisma = new PrismaClient()
 
 const tableNames = ['User', 'Server', 'Vote', 'Tag', 'Version']
 
 const main = async () => {
+  console.mute()
   for (const tableName of tableNames) {
     await prisma.$queryRaw(`DELETE FROM "${tableName}";`)
 
