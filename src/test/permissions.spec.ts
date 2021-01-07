@@ -53,23 +53,6 @@ describe('Permissions', () => {
     expect(res.body.errors).to.be.an('array')
     expect(res.body.errors[0].message).to.be.a('string', 'Not Authorised!')
   })
-  it("user can't edit servers it doesn't own", async () => {
-    const res = await chai
-      .request(app)
-      .post('/')
-      .set('token', process.env.USER_TOKEN)
-      .send({
-        query: `mutation{
-          updateTitle(id: 1, title: "New title") {
-            server{
-              title
-            }
-          }
-        }`,
-      })
-    expect(res.body.errors).to.be.an('array')
-    expect(res.body.errors[0].message).to.be.a('string', 'Not Authorised!')
-  })
   it("users can't reset votes", async () => {
     const res = await chai
       .request(app)
@@ -96,7 +79,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation { updateRole(id: 9999, role: "admin") { user { role } } }`,
       })
@@ -107,7 +90,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation{
           updateBan(id: 9999, banned: true) {
@@ -124,7 +107,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation{
           updateBan(id: 9999, banned: false) {
@@ -141,7 +124,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation{
           updateBan(id: 65157, banned: true) {
@@ -158,7 +141,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation{
           updateBan(id: 6667, banned: true) {
@@ -175,7 +158,7 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.ADMIN_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
         query: `mutation { resetVotes(id: 1") { title }`,
       })
@@ -185,13 +168,15 @@ describe('Permissions', () => {
     const res = await chai
       .request(app)
       .post('/')
-      .set('Cookie', 'token=' + process.env.USER_TOKEN)
+      .set('Cookie', 'token=' + process.env.MOD_TOKEN)
       .send({
-        query: `mutation{
-          updateTitle(id: 1, title: "New title of a big ole server") {
-            title
+        query: `
+          mutation{
+            updateTitle(id: 1, title: "New title of a big ole server") {
+              title
+            }
           }
-        }`,
+        `,
       })
     expect(res).to.have.status(200)
     expect(res.body.data.updateTitle).to.exist

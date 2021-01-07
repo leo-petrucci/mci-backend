@@ -331,7 +331,7 @@ export const Mutation = mutationType({
     })
 
     t.field('createServer', {
-      type: 'ServerPayload',
+      type: 'Server',
       args: {
         title: stringArg({ nullable: false }),
         content: stringArg(),
@@ -357,7 +357,6 @@ export const Mutation = mutationType({
         }
 
         const tagObjects = await getTagsQuery(ctx, tags)
-        console.log('tags', tagObjects)
 
         if (!userId) throw new Error('Could not authenticate user.')
 
@@ -367,7 +366,6 @@ export const Mutation = mutationType({
 
         // return create or connect version
         const versionQuery = await getVersionQuery(ctx, serverInfo.version)
-        console.log('versionQuery', versionQuery)
         const server = await ctx.prisma.server.create({
           data: {
             title,
@@ -381,7 +379,7 @@ export const Mutation = mutationType({
             author: { connect: { id: Number(userId) } },
           },
         })
-        return { server }
+        return server
       },
     })
 

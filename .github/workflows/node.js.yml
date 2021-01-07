@@ -23,6 +23,8 @@ jobs:
         env:
           CI: true
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          BANNED_TOKEN: ${{ secrets.BANNED_TOKEN }}
+          MOD_TOKEN: ${{ secrets.MOD_TOKEN }}
           APP_SECRET: ${{ secrets.APP_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           USER_TOKEN: ${{ secrets.USER_TOKEN }}

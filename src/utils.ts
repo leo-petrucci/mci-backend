@@ -15,9 +15,7 @@ export function getUserId(context: Context, bypassError: boolean = false) {
   if (context.req.header('Cookie')) {
     const Authorization = cookie.parse(context.req.header('Cookie'))
     const { token } = Authorization
-    console.log('token is', token)
     try {
-      console.log(verify(token, APP_SECRET))
       const verifiedToken = verify(token, APP_SECRET) as Token
       return verifiedToken && verifiedToken.userId
     } catch (error) {
