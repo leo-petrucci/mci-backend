@@ -3,25 +3,25 @@ generator client {
 }
 
 datasource db {
-  provider = "postgres"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Server {
-  id        Int     @default(autoincrement()) @id
+  id        Int      @id @default(autoincrement())
   title     String
   content   String?
-  published Boolean @default(false)
+  published Boolean  @default(false)
   createdAt DateTime @default(now())
   cover     String?
   slots     Int
-  ip        String  @default("")
-  author    User    @relation(fields: [authorId], references: [id])
+  ip        String   @default("")
   authorId  Int
-  version   Version @relation(fields: [versionId], references: [id])
   versionId Int
-  tags      Tag[]
+  author    User     @relation(fields: [authorId], references: [id])
+  version   Version  @relation(fields: [versionId], references: [id])
   votes     Vote[]
+  tags      Tag[]
 }
 
 model User {
@@ -32,19 +32,19 @@ model User {
   photoUrl String   @default("")
   posts    Int      @default(0)
   banned   Boolean  @default(false)
-  Votes    Vote[]
   Servers  Server[]
+  Votes    Vote[]
 }
 
 model Tag {
-  id      Int      @default(autoincrement()) @id
+  id      Int      @id @default(autoincrement())
   tagName String   @unique
   Servers Server[]
 }
 
 model Vote {
-  id        Int      @default(autoincrement()) @unique
-  createdAt DateTime @default(now()) @id
+  id        Int      @unique @default(autoincrement())
+  createdAt DateTime @id @default(now())
   authorId  Int
   serverId  Int
   author    User     @relation(fields: [authorId], references: [id])
@@ -52,7 +52,7 @@ model Vote {
 }
 
 model Version {
-  id          Int      @default(autoincrement()) @id
+  id          Int      @id @default(autoincrement())
   versionName String   @unique
   Servers     Server[]
 }
