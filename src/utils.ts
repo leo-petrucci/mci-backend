@@ -126,7 +126,7 @@ export async function getTagsQuery(
 }> {
   const foundTags = tags.map(async (tag) => {
     console.log('Checking tag', tag)
-    const foundTag = await context.prisma.tag.findOne({
+    const foundTag = await context.prisma.tag.findUnique({
       where: {
         tagName: String(tag),
       },
