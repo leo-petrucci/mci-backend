@@ -8,7 +8,11 @@ const opts = {
   port: 4000,
   cors: {
     credentials: true,
-    origin: ['http://localhost:3000', /\.vercel\.app$/], // your frontend url.
+    origin: [
+      'http://localhost:3000',
+      /\.vercel\.app$/,
+      'https://servers.minecraftitalia.net',
+    ], // your frontend url.
   },
 }
 
