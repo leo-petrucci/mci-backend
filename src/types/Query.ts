@@ -1,4 +1,4 @@
-import { intArg, nonNull, nullable, queryType, stringArg } from '@nexus/schema'
+import { intArg, nonNull, nullable, queryType, stringArg } from 'nexus'
 import { getDates, getUserId } from '../utils'
 
 export const Query = queryType({

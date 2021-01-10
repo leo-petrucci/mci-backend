@@ -13,7 +13,6 @@
     "dev": "ts-node-dev --exit-child --no-notify --respawn --transpileOnly src/server"
   },
   "dependencies": {
-    "@nexus/schema": "^0.20.1",
     "@prisma/client": "^2.14.0",
     "@types/cookie": "^0.4.0",
     "aws-lambda": "^1.0.6",

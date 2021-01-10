@@ -6,7 +6,7 @@ import {
   FieldResolver,
   nonNull,
   list,
-} from '@nexus/schema'
+} from 'nexus'
 import { string, object, array } from 'yup'
 import { compare, hash } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
