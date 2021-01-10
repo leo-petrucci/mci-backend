@@ -13,6 +13,7 @@ model Server {
   content   String?
   published Boolean  @default(false)
   createdAt DateTime @default(now())
+  lastUpdated DateTime @default(now())
   cover     String?
   slots     Int
   ip        String   @default("")
