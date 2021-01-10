@@ -4,6 +4,8 @@ import {
   stringArg,
   booleanArg,
   FieldResolver,
+  nonNull,
+  list,
 } from '@nexus/schema'
 import { string, object, array } from 'yup'
 import { compare, hash } from 'bcryptjs'
@@ -46,30 +48,10 @@ const validationSchema = {
 
 export const Mutation = mutationType({
   definition(t) {
-    t.field('testResponse', {
-      type: 'String',
-      args: {},
-      resolve: async (_parent, {}, { res, req }) => {
-        console.log(cookie.parse(req.header('Cookie')))
-
-        const securedToken = 'a string'
-
-        var expiration = new Date()
-        expiration.setDate(expiration.getDate() + 7)
-
-        res.cookie('rememberme', '1', {
-          expires: new Date(Date.now() + 900000 * 4 * 24 * 7),
-          httpOnly: true,
-        })
-
-        return securedToken
-      },
-    })
-
     t.field('oAuthLogin', {
       type: 'AuthPayload',
       args: {
-        code: stringArg({ nullable: false }),
+        code: nonNull(stringArg()),
       },
       resolve: async (_parent, { code }, ctx) => {
         let token
@@ -125,8 +107,8 @@ export const Mutation = mutationType({
     t.field('updateRole', {
       type: 'UserPayload',
       args: {
-        id: intArg({ nullable: false }),
-        role: stringArg({ nullable: false }),
+        id: nonNull(intArg()),
+        role: nonNull(stringArg()),
       },
       resolve: async (parent, { id, role }, ctx) => {
         const user = await ctx.prisma.user.update({
@@ -144,8 +126,8 @@ export const Mutation = mutationType({
     t.field('updateBan', {
       type: 'UserPayload',
       args: {
-        id: intArg({ nullable: false }),
-        banned: booleanArg({ nullable: false }),
+        id: nonNull(intArg()),
+        banned: nonNull(booleanArg()),
       },
       resolve: async (parent, { banned, id }, ctx) => {
         const user = await ctx.prisma.user.update({
@@ -163,8 +145,8 @@ export const Mutation = mutationType({
     t.field('updateTitle', {
       type: 'ServerPayload',
       args: {
-        id: intArg({ nullable: false }),
-        title: stringArg({ nullable: false }),
+        id: nonNull(intArg()),
+        title: nonNull(stringArg()),
       },
       resolve: async (parent, { title, id }, ctx): Promise<any> => {
         try {
@@ -187,8 +169,8 @@ export const Mutation = mutationType({
     t.field('updateContent', {
       type: 'ServerPayload',
       args: {
-        id: intArg({ nullable: false }),
-        content: stringArg({ nullable: false }),
+        id: nonNull(intArg()),
+        content: nonNull(stringArg()),
       },
       resolve: async (parent, { content, id }, ctx): Promise<any> => {
         try {
@@ -211,8 +193,8 @@ export const Mutation = mutationType({
     t.field('addTag', {
       type: 'ServerPayload',
       args: {
-        id: intArg({ nullable: false }),
-        tags: stringArg({ list: true, nullable: false }),
+        id: nonNull(intArg()),
+        tags: nonNull(list(nonNull('String'))),
       },
       resolve: async (parent, { id, tags }, ctx): Promise<any> => {
         try {
@@ -237,8 +219,8 @@ export const Mutation = mutationType({
     t.field('removeTag', {
       type: 'ServerPayload',
       args: {
-        id: intArg({ nullable: false }),
-        tag: stringArg({ nullable: false }),
+        id: nonNull(intArg()),
+        tag: nonNull(stringArg()),
       },
       resolve: async (parent, { id, tag }, ctx): Promise<any> => {
         const server = await ctx.prisma.server.update({
@@ -254,8 +236,8 @@ export const Mutation = mutationType({
     t.field('updateCover', {
       type: 'ServerPayload',
       args: {
-        id: intArg({ nullable: false }),
-        cover: stringArg({ nullable: false }),
+        id: nonNull(intArg()),
+        cover: nonNull(stringArg()),
       },
       resolve: async (parent, { id, cover }, ctx): Promise<any> => {
         try {
@@ -278,8 +260,8 @@ export const Mutation = mutationType({
     t.field('updateIp', {
       type: 'ServerPayload',
       args: {
-        id: intArg({ nullable: false }),
-        ip: stringArg({ nullable: false }),
+        id: nonNull(intArg()),
+        ip: nonNull(stringArg()),
       },
       resolve: async (parent, { id, ip }, ctx) => {
         let serverInfo
@@ -303,8 +285,8 @@ export const Mutation = mutationType({
     t.field('updateRemoteInfo', {
       type: 'ServerPayload',
       args: {
-        id: intArg({ nullable: false }),
-        ip: stringArg({ nullable: false }),
+        id: nonNull(intArg()),
+        ip: nonNull(stringArg()),
       },
       resolve: async (parent, { id, ip }, ctx) => {
         let serverInfo
@@ -333,11 +315,11 @@ export const Mutation = mutationType({
     t.field('createServer', {
       type: 'Server',
       args: {
-        title: stringArg({ nullable: false }),
+        title: nonNull(stringArg()),
         content: stringArg(),
         cover: stringArg(),
-        tags: stringArg({ list: true, nullable: false }),
-        ip: stringArg({ nullable: false }),
+        tags: nonNull(list(nonNull('String'))),
+        ip: nonNull(stringArg()),
       },
       resolve: async (
         parent,
@@ -385,7 +367,7 @@ export const Mutation = mutationType({
 
     t.field('deleteServer', {
       type: 'ServerPayload',
-      args: { id: intArg({ nullable: false }) },
+      args: { id: nonNull(intArg()) },
       resolve: async (parent, { id }, ctx): Promise<any> => {
         const server = ctx.prisma.server.update({
           where: {
@@ -401,7 +383,7 @@ export const Mutation = mutationType({
 
     t.field('publishServer', {
       type: 'ServerPayload',
-      args: { id: intArg({ nullable: false }) },
+      args: { id: nonNull(intArg()) },
       resolve: async (parent, { id }, ctx): Promise<any> => {
         const server = ctx.prisma.server.update({
           where: {
@@ -417,8 +399,7 @@ export const Mutation = mutationType({
 
     t.field('vote', {
       type: 'VoteCast',
-      nullable: true,
-      args: { id: intArg({ nullable: false }) },
+      args: { id: nonNull(intArg()) },
       resolve: async (parent, { id }, ctx): Promise<any> => {
         const userId = getUserId(ctx)
         const [d, f] = getDates(new Date().toISOString())
@@ -451,13 +432,12 @@ export const Mutation = mutationType({
 
     t.field('resetVotes', {
       type: 'ServerPayload',
-      nullable: true,
-      args: { id: intArg({ nullable: false }) },
+      args: { id: nonNull(intArg()) },
       resolve: async (parent, { id }, ctx): Promise<any> => {
         const vote = await ctx.prisma.vote.deleteMany({
           where: { serverId: id },
         })
-        return ctx.prisma.server.findOne({
+        return ctx.prisma.server.findUnique({
           where: {
             id: Number(id),
           },

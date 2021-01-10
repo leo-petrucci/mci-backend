@@ -104,7 +104,7 @@ export async function getMciProfile(
 
 export async function getVersionQuery(context: Context, versionName: string) {
   console.log('checking if ', versionName, 'exists')
-  const foundVersion = await context.prisma.version.findOne({
+  const foundVersion = await context.prisma.version.findUnique({
     where: {
       versionName: String(versionName),
     },

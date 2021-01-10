@@ -1,14 +1,13 @@
-import { intArg, queryType, stringArg } from '@nexus/schema'
+import { intArg, nonNull, nullable, queryType, stringArg } from '@nexus/schema'
 import { getDates, getUserId } from '../utils'
 
 export const Query = queryType({
   definition(t) {
     t.field('me', {
       type: 'User',
-      nullable: true,
       resolve: (parent, args, ctx) => {
         const userId = getUserId(ctx)
-        return ctx.prisma.user.findOne({
+        return ctx.prisma.user.findUnique({
           where: {
             id: Number(userId),
           },
@@ -26,8 +25,8 @@ export const Query = queryType({
     t.list.field('feed', {
       type: 'Server',
       args: {
-        date: stringArg({ default: new Date().toISOString(), nullable: false }),
-        page: intArg({ default: 0, nullable: false }),
+        date: nonNull(stringArg({ default: new Date().toISOString() })),
+        page: nonNull(intArg({ default: 0 })),
       },
       resolve: (parent, { date, page }, ctx) => {
         const pageLimit = 10
@@ -203,9 +202,9 @@ export const Query = queryType({
     t.list.field('searchServers', {
       type: 'Server',
       args: {
-        date: stringArg({ default: new Date().toISOString(), nullable: false }),
-        searchString: stringArg({ nullable: true }),
-        page: intArg({ default: 0, nullable: false }),
+        date: nonNull(stringArg({ default: new Date().toISOString() })),
+        searchString: nullable(stringArg()),
+        page: nonNull(intArg({ default: 0 })),
       },
       resolve: async (parent, { searchString, date, page }, ctx) => {
         const [d, f] = getDates(date)
@@ -235,10 +234,9 @@ export const Query = queryType({
 
     t.field('server', {
       type: 'Server',
-      nullable: true,
       args: {
-        id: intArg(),
-        date: stringArg({ default: new Date().toISOString(), nullable: false }),
+        id: nullable(intArg()),
+        date: nonNull(stringArg({ default: new Date().toISOString() })),
       },
       resolve: async (parent, { id, date }, ctx) => {
         const [d, f] = getDates(date)
@@ -420,7 +418,7 @@ export const Query = queryType({
     t.list.field('searchTags', {
       type: 'Tag',
       args: {
-        searchString: stringArg({ nullable: true }),
+        searchString: nonNull(stringArg()),
       },
       resolve: async (parent, { searchString }, ctx) => {
         return await ctx.prisma.$queryRaw`
