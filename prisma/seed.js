@@ -1,4 +1,3 @@
-const { mapObj } = require('@nexus/schema/dist/core')
 const { PrismaClient } = require('@prisma/client')
 const { versionData } = require('./seedData')
 const { tagData } = require('./seedData')

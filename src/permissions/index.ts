@@ -4,7 +4,7 @@ import { getUserId } from '../utils'
 const rules = {
   isAuthenticatedUser: rule()(async (parent, args, context) => {
     const userId = getUserId(context)
-    const user = await context.prisma.user.findOne({
+    const user = await context.prisma.user.findUnique({
       where: {
         id: Number(userId),
       },
@@ -18,7 +18,7 @@ const rules = {
     console.log(context.req.header['Cookie'])
     const userId = getUserId(context)
     const author = await context.prisma.server
-      .findOne({
+      .findUnique({
         where: {
           id: Number(id),
         },
@@ -28,7 +28,7 @@ const rules = {
   }),
   fromMod: rule()(async (parent, { id }, context) => {
     const userId = getUserId(context)
-    const user = await context.prisma.user.findOne({
+    const user = await context.prisma.user.findUnique({
       where: {
         id: Number(userId),
       },
@@ -37,7 +37,7 @@ const rules = {
   }),
   fromAdmin: rule()(async (parent, { id }, context) => {
     const userId = getUserId(context)
-    const user = await context.prisma.user.findOne({
+    const user = await context.prisma.user.findUnique({
       where: {
         id: Number(userId),
       },
@@ -45,7 +45,7 @@ const rules = {
     return user.role === 'admin'
   }),
   isMod: rule()(async (parent, { id }, context) => {
-    const user = await context.prisma.user.findOne({
+    const user = await context.prisma.user.findUnique({
       where: {
         id: Number(id),
       },
@@ -53,7 +53,7 @@ const rules = {
     return user.role === 'admin' || user.role === 'mod'
   }),
   isAdmin: rule()(async (parent, { id }, context) => {
-    const user = await context.prisma.user.findOne({
+    const user = await context.prisma.user.findUnique({
       where: {
         id: Number(id),
       },
