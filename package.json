@@ -2,7 +2,7 @@
   "name": "prisma-backend",
   "license": "MIT",
   "scripts": {
-    "test": "mocha --exit --timeout 10000 -r dotenv/config dist/test/**/*.spec.*",
+    "test": "node prisma/seed && mocha --exit --timeout 10000 -r dotenv/config dist/test/**/*.spec.*",
     "test:dev": "node prisma/seed && ts-mocha --exit --timeout 10000 -r dotenv/config src/test/**/*.spec.*",
     "start": "node -r dotenv/config dist/server",
     "clean": "rm -rf dist",
