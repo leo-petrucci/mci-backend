@@ -44,6 +44,7 @@ export const Query = queryType({
                 ,   s.title
                 ,   s.content
                 ,   s.ip
+                ,   s."lastUpdated"
                 ,   s.cover
                 ,   s.slots
                 ,   s."createdAt"
@@ -122,6 +123,8 @@ export const Query = queryType({
                     ) AS uv
                     ON
                         v."serverId" = s.id
+                ORDER BY
+                    "voteCount" DESC, s."lastUpdated" DESC
                 OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;
             `
         } else {
@@ -132,6 +135,7 @@ export const Query = queryType({
                 ,   s.title
                 ,   s.content
                 ,   s.ip
+                ,   s."lastUpdated"
                 ,   s.cover
                 ,   s.slots
                 ,   s."createdAt"
@@ -193,6 +197,8 @@ export const Query = queryType({
                     ) as v 
                     ON 
                         s.id = v."serverId"
+                ORDER BY
+                    "voteCount" DESC, s."lastUpdated" DESC
                 OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;
             `
         }
@@ -257,6 +263,7 @@ export const Query = queryType({
             ,   s.title
             ,   s.content
             ,   s.cover
+            ,   s."lastUpdated"
             ,   s.ip
             ,   s.slots
             ,   s."createdAt"
@@ -346,6 +353,7 @@ export const Query = queryType({
             ,   s.title
             ,   s.content
             ,   s.ip
+            ,   s."lastUpdated"
             ,   s.cover
             ,   s.slots
             ,   s."createdAt"

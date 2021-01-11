@@ -24,6 +24,17 @@ const rules = {
         },
       })
       .author()
+    if (userId !== author.id) {
+      const user = await context.prisma.user.findUnique({
+        where: {
+          id: Number(userId),
+        },
+      })
+      if (user.role === 'admin' || user.role === 'mod') {
+      } else {
+        context.res.status(401)
+      }
+    }
     return userId === author.id
   }),
   fromMod: rule()(async (parent, { id }, context) => {

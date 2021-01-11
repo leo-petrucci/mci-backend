@@ -7,7 +7,7 @@ import {
   nonNull,
   list,
 } from 'nexus'
-import { string, object, array } from 'yup'
+import { string, object, array, date } from 'yup'
 import { compare, hash } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
 import {
@@ -283,7 +283,7 @@ export const Mutation = mutationType({
     })
 
     t.field('updateRemoteInfo', {
-      type: 'ServerPayload',
+      type: 'Server',
       args: {
         id: nonNull(intArg()),
         ip: nonNull(stringArg()),
@@ -305,10 +305,11 @@ export const Mutation = mutationType({
           where: { id: id },
           data: {
             version: versionQuery,
+            lastUpdated: new Date(),
             slots: serverInfo.players.max,
           },
         })
-        return { server }
+        return server
       },
     })
 
