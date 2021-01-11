@@ -44,6 +44,7 @@ export const Query = queryType({
                 ,   s.title
                 ,   s.content
                 ,   s.ip
+                ,   s."lastUpdated"
                 ,   s.cover
                 ,   s.slots
                 ,   s."createdAt"
@@ -132,6 +133,7 @@ export const Query = queryType({
                 ,   s.title
                 ,   s.content
                 ,   s.ip
+                ,   s."lastUpdated"
                 ,   s.cover
                 ,   s.slots
                 ,   s."createdAt"
@@ -257,6 +259,7 @@ export const Query = queryType({
             ,   s.title
             ,   s.content
             ,   s.cover
+            ,   s."lastUpdated"
             ,   s.ip
             ,   s.slots
             ,   s."createdAt"
@@ -346,6 +349,7 @@ export const Query = queryType({
             ,   s.title
             ,   s.content
             ,   s.ip
+            ,   s."lastUpdated"
             ,   s.cover
             ,   s.slots
             ,   s."createdAt"

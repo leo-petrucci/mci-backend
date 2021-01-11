@@ -78,6 +78,7 @@ export const Server = objectType({
   definition(t) {
     t.model.id()
     t.model.published()
+    t.model.lastUpdated()
     t.model.createdAt()
     t.model.title()
     t.model.ip()
