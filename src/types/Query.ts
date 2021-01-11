@@ -22,6 +22,13 @@ export const Query = queryType({
       },
     })
 
+    t.list.field('allServers', {
+      type: 'Server',
+      resolve: (parent, args, ctx) => {
+        return ctx.prisma.server.findMany()
+      },
+    })
+
     t.list.field('feed', {
       type: 'Server',
       args: {
