@@ -123,6 +123,8 @@ export const Query = queryType({
                     ) AS uv
                     ON
                         v."serverId" = s.id
+                ORDER BY
+                    "voteCount" DESC, s."lastUpdated" DESC
                 OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;
             `
         } else {
@@ -195,6 +197,8 @@ export const Query = queryType({
                     ) as v 
                     ON 
                         s.id = v."serverId"
+                ORDER BY
+                    "voteCount" DESC, s."lastUpdated" DESC
                 OFFSET ${page > 10 ? pageLimit * 25 : page} LIMIT 25;
             `
         }
